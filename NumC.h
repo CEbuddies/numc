@@ -8,12 +8,26 @@
 
 // not easy to make this generic
 // can later become a union or something special where string is parsed
+/*
 typedef struct {
     int shape0;
     int shape1;
     int shape2;
     int shape3;
 } Shape;
+*/
+typedef union {
+    struct {
+        int s0;
+        int s1;
+        int s2;
+        int s3;
+    } shapef;
+    int sh[4];
+} Shape;
+
+#define SHAPE(a, b, c, d) \
+    ((Shape) {.sh[0]=a, .sh[1]=b, .sh[2]=c, .sh[3]=d})
 
 typedef enum {
     INT,
