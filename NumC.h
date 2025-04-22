@@ -4,6 +4,8 @@
 #include <string.h>
 #include <stdint.h>
 
+// TODO: check if we can generally typecast a struct
+
 #ifndef NUMC_H
 #define NUMC_H
 
@@ -17,6 +19,12 @@ typedef union {
     int sh[4];
 } Shape;
 
+// can be used to find a value for exmaple
+typedef struct {
+	size_t idx;
+	double val;
+} Tuple;
+
 #define SHAPE(a, b, c, d) \
     ((Shape) {.sh[0]=a, .sh[1]=b, .sh[2]=c, .sh[3]=d})
 
@@ -26,6 +34,7 @@ typedef enum {
     DBL
 } Type;
 
+// standard array with a void pointer
 typedef struct {
     void * array;
     int len;
@@ -45,36 +54,23 @@ typedef struct {
 } ArrayI8;
 
 typedef struct {
-    float * array;
-    int len;
-    Type type;
-} ArrayF;
-
-typedef struct {
-    void * array;
-    int len;
-    Type type;
-} ArrayG;
-
-typedef struct {
 	ArrayI (*zeros)(int len);
 	void (*fill)(ArrayI array, int8_t val);
 } Int;
 
 typedef struct {
-	ArrayF (*zeros)(int len);
-	ArrayF (*fill)(ArrayF array, float val);
-} Float;
+	ArrayI8 (*zeros)(int len);
+	Tuple (*where)(ArrayI8 array, int val);
+} Int8;
 
 typedef struct {
     Array (*randint)(int len);
     ArrayI (*zeros)(int len); 
-    ArrayF (*zerosf)(int len);
     int (*max)(Array array); // should take any array
     int (*min)(Array array);
     double (*scalar)(Array a1, Array a2);
     Int I;
-    Float Fl;
+    Int8 I8;
 } NumC;
 
 
@@ -109,28 +105,6 @@ Array rint_(int len){
     
     return r_array;
 }
-// TODO: might need typecast or something
-int __maxint(int * array, int len){
-    // how to go about overflows?
-    int max = array[0];
-    for (int i=0; i<len; i++){
-        if (array[i] > max){
-            max = array[i];
-        }
-    }
-    return max;
-}
-
-int __minint(int * array, int len){
-    int min = array[0];
-    for (int i=0; i<len; i++){
-        if (array[i] < min){
-            min = array[i];
-        }
-    }
-    return min;
-}
-
 ArrayI __zeros(int len){
 	ArrayI array;
 	array.len = len;
@@ -140,40 +114,37 @@ ArrayI __zeros(int len){
 	return array;
 }
 
-ArrayI8 __zerosG(int len){
+ArrayI8 __zerosi8(int len){
 	ArrayI8 array;
 	array.len = len;
 	array.type = INT;
 	array.array = calloc(len, sizeof(int8_t));
-}
-
-ArrayF __zerosf(int len){
-	ArrayF array;
-	array.len = len;
-	array.type = FLT;
-	array.array = calloc(len, sizeof(float));
-
 	return array;
 }
+
+
 void __fill(ArrayI array, int8_t val){
 	for (int i=0; i<array.len; i++) {
 		array.array[i] = val;
 	}
 }
-
-// Fill function for floats
-void __fillf(ArrayF array, float val){
-	for (int i=0; i<array.len; i++) {
-		array.array[i] = val;
-	}
-}
-
 double __isum(ArrayI array) {
 	double sum = 0;
 	for (int i=0; i<array.len; i++) {
 		sum += array.array[i];
 	}
 	return sum;
+}
+
+Tuple __where(ArrayI8 array, int val) {
+	Tuple t;
+	for (int i=0; i<array.len; i++) {
+		if (array.array[i] == val) {
+			t.idx = i;
+			t.val = array.array[i];
+		}
+	}
+	return t;
 }
 
 // how to clear this later?
@@ -183,13 +154,11 @@ NumC numcinit(){
     // nc.max = &__maxint;
     // nc.min = &__minint;
     nc.zeros = &__zeros;
-    nc.zerosG = &__zerosG;
-    nc.zerosf = &__zerosf;
     nc.randint = &rint_;
     nc.I.zeros = &__zeros;
+    nc.I8.zeros = &__zerosi8;
+    nc.I8.where = &__where;
     nc.I.fill = &__fill;
-    nc.Fl.zeros = &__zerosf;
-    nc.Fl.fill = &__fillf;
     // nc.scalar = &std_scalar;
     return nc;
 }
