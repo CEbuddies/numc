@@ -42,7 +42,7 @@ typedef struct {
 } Array;
 
 typedef struct {
-    int8_t * array;
+    int * array;
     int len;
     Type type;
 } ArrayI;
@@ -61,35 +61,24 @@ typedef struct {
 typedef struct {
 	ArrayI8 (*zeros)(int len);
 	Tuple (*where)(ArrayI8 array, int val);
+	ArrayI (*whereAll)(ArrayI8 array, int8_t val);
+	void (*fill)(ArrayI8 array, int8_t val);
+	size_t (*count)(ArrayI8 array, int8_t val);
 } Int8;
 
 typedef struct {
     Array (*randint)(int len);
     ArrayI (*zeros)(int len); 
-    int (*max)(Array array); // should take any array
+    double (*max)(void * array, int len, Type type); // should take any array
     int (*min)(Array array);
-    double (*scalar)(Array a1, Array a2);
+    double (*scalar)(void * a1, void * a2, int len, Type type);
     Int I;
     Int8 I8;
 } NumC;
 
 
 NumC numcinit();
-/*
-double std_scalar(Array a1, Array a2){
-    // here goes checking
-    // TODO: do proper error handling here
-    if (a1.len != a2.len){
-        printf("Trying to multiply arrays of different shapes\n");
-        return -1;
-    }
-    double sum = 0;
-    for (int i=0; i<a1.len; i++){
-        sum += a1.array[i] * a2.array[i];
-    }
-    return sum;
-}
-*/
+
 Array rint_(int len){
     int * array = calloc(len, sizeof(int));
     srand(time(NULL));
@@ -147,6 +136,71 @@ Tuple __where(ArrayI8 array, int val) {
 	return t;
 }
 
+ArrayI __whereAll(ArrayI8 array, int8_t val) {
+	int count = 0;
+	int loc_cap = 15;
+	int * locs = calloc(loc_cap, sizeof(int));
+	for (int i=0; i<array.len; i++) {
+		if (array.array[i] == val) {
+			count++;
+			if (count > loc_cap) {
+				loc_cap *= 2;
+				locs = realloc(locs, loc_cap*sizeof(int));
+			}
+			locs[count-1] = i;
+		}
+		
+	}
+	ArrayI arr;
+	arr.array = locs;
+	arr.len = count;
+	arr.type = INT;
+	return arr;
+}
+
+void __filli8(ArrayI8 array, int8_t val){
+	for (int i=0; i<array.len; i++) {
+		array.array[i] = val;
+	}
+}
+
+size_t __counti8(ArrayI8 array, int8_t val) {
+	size_t count = 0;
+	for (int i=0; i<array.len; i++) {
+		if (array.array[i] == val) {
+			count++;
+		}
+	}
+	return count;
+}
+
+double __max(void * array, int len, Type type) {
+	double max = 0;
+	int8_t * localarray = (int8_t *)array;
+	for (int i=0; i<len; i++) {
+		if (localarray[i] > max) {
+			max = localarray[i];
+		}
+	}
+	
+	return max;
+}
+// std scalar product for arbitray types with void * pointers
+double __std_scalar(void * a1, void * a2, int len, Type type){
+
+    double sum = 0;
+    if (type == INT){
+	for (int i=0; i<len; i++){
+	    sum += ((int8_t *)a1)[i] * ((int8_t *)a2)[i];
+	}
+    } else if (type == DBL){
+	for (int i=0; i<len; i++){
+	    sum += ((double *)a1)[i] * ((double *)a2)[i];
+	}
+    }
+    return sum;
+}
+
 // how to clear this later?
 NumC numcinit(){
 
@@ -155,9 +209,14 @@ NumC numcinit(){
     // nc.min = &__minint;
     nc.zeros = &__zeros;
     nc.randint = &rint_;
+    nc.max = &__max;
+    nc.scalar = &__std_scalar;
     nc.I.zeros = &__zeros;
     nc.I8.zeros = &__zerosi8;
     nc.I8.where = &__where;
+    nc.I8.whereAll = &__whereAll;
+    nc.I8.fill = &__filli8;
+    nc.I8.count = &__counti8;
     nc.I.fill = &__fill;
     // nc.scalar = &std_scalar;
     return nc;
