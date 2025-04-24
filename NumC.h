@@ -172,12 +172,21 @@ void __fill(void * array, int len, double val, Type type){
 				break;
 			}
 		case FLT:
-			for (int i=0; i<len; i++) {
-				((double *)array)[i] = val;
+			{
+				float fval = (float)val;
+				for (int i=0; i<len; i++) {
+					((float *)array)[i] = fval;
+				}
+				break;
 			}
-			break;
 		case DBL:
-			break;
+			{
+				double dval = (double)val;
+				for (int i=0; i<len; i++) {
+					((double *)array)[i] = dval;
+				}
+				break;
+			}
 	}
 	
 }
