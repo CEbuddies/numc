@@ -3,6 +3,13 @@
 #include <string.h>
 #include "NumC.h"
 
+/*
+ * TODO
+ * - sort out int vs. int8
+ * - testing?
+ * - multidimensional arrays implementation using shape
+*/
+
 
 int main(){
     printf("NumC testsuite!\n");
