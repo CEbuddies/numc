@@ -3,24 +3,6 @@
 #include <string.h>
 #include "NumC.h"
 
-void parse_matstring(char * matstr){
-    for (int i=0; i<strlen(matstr); i++){
-        printf("Char number %d: %c\n", i, matstr[i]);
-    }
-}
-
-typedef struct {
-    int a;
-    int b;
-} SomeStruct;
-    
-Array return_array(void * array, int len){
-    Array arr = {
-        .array = array,
-        .len = len
-    };
-    return arr;
-}
 
 int main(){
     printf("NumC testsuite!\n");
