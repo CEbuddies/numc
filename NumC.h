@@ -72,6 +72,7 @@ typedef struct {
     double (*max)(void * array, int len, Type type); // should take any array
     int (*min)(Array array);
     double (*scalar)(void * a1, void * a2, int len, Type type);
+    void (*fill)(void * array, int len, double val, Type type);
     Int I;
     Int8 I8;
 } NumC;
@@ -112,11 +113,6 @@ ArrayI8 __zerosi8(int len){
 }
 
 
-void __fill(ArrayI array, int8_t val){
-	for (int i=0; i<array.len; i++) {
-		array.array[i] = val;
-	}
-}
 double __isum(ArrayI array) {
 	double sum = 0;
 	for (int i=0; i<array.len; i++) {
@@ -162,6 +158,28 @@ void __filli8(ArrayI8 array, int8_t val){
 	for (int i=0; i<array.len; i++) {
 		array.array[i] = val;
 	}
+}
+
+void __fill(void * array, int len, double val, Type type){
+
+	switch(type) {
+		case INT:
+			{
+				int ival = (int)val;
+				for (int i=0; i<len; i++) {
+					((int8_t *)array)[i] = ival;
+				}
+				break;
+			}
+		case FLT:
+			for (int i=0; i<len; i++) {
+				((double *)array)[i] = val;
+			}
+			break;
+		case DBL:
+			break;
+	}
+	
 }
 
 size_t __counti8(ArrayI8 array, int8_t val) {
