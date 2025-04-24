@@ -80,6 +80,10 @@ typedef struct {
 
 NumC numcinit();
 
+static int * __intcast(void * array) {
+	return (int*)array;
+}
+
 Array rint_(int len){
     int * array = calloc(len, sizeof(int));
     srand(time(NULL));
@@ -117,6 +121,20 @@ double __isum(ArrayI array) {
 	double sum = 0;
 	for (int i=0; i<array.len; i++) {
 		sum += array.array[i];
+	}
+	return sum;
+}
+
+double __sum(void * array, int len, Type type) {
+	double sum = 0;
+	if (type == INT){
+		for (int i=0; i<len; i++){
+			sum += ((int8_t *)array)[i];
+		}
+	} else if (type == DBL){
+		for (int i=0; i<len; i++){
+			sum += ((double *)array)[i];
+		}
 	}
 	return sum;
 }
