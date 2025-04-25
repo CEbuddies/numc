@@ -51,7 +51,8 @@ typedef struct {
     XArray (*zeros)(Sh s, Type type);
     double (*max)(void * array, int len, Type type); // should take any array
     double (*scalar)(void * a1, void * a2, int len, Type type);
-    void (*fill)(void * array, int len, double val, Type type);
+    void (*fill)(XArray array, double val);
+    void (*shape)(XArray array);
 } NumC;
 
 
@@ -120,6 +121,15 @@ void shape(XArray array) {
 	printf("Arraylen: %i\nArraytype: %s\n", array.shape.len, typename);
 }
 
+void __fill(XArray array, double val) {
+	if (array.shape.type == INT){
+		int * locarr = (int*)array.array;
+		for (int i=0; i<array.shape.len; i++){
+			locarr[i] = val;
+		}
+	}
+}
+
 double __sum(XArray array) {
 	double sum = 0;
 
@@ -130,86 +140,6 @@ double __sum(XArray array) {
 		}
 	}	
 	return sum;
-}
-
-Tuple __where(ArrayI8 array, int val) {
-	Tuple t;
-	for (int i=0; i<array.len; i++) {
-		if (array.array[i] == val) {
-			t.idx = i;
-			t.val = array.array[i];
-		}
-	}
-	return t;
-}
-
-ArrayI __whereAll(ArrayI8 array, int8_t val) {
-	int count = 0;
-	int loc_cap = 15;
-	int * locs = calloc(loc_cap, sizeof(int));
-	for (int i=0; i<array.len; i++) {
-		if (array.array[i] == val) {
-			count++;
-			if (count > loc_cap) {
-				loc_cap *= 2;
-				locs = realloc(locs, loc_cap*sizeof(int));
-			}
-			locs[count-1] = i;
-		}
-		
-	}
-	ArrayI arr;
-	arr.array = locs;
-	arr.len = count;
-	arr.type = INT;
-	return arr;
-}
-
-void __filli8(ArrayI8 array, int8_t val){
-	for (int i=0; i<array.len; i++) {
-		array.array[i] = val;
-	}
-}
-
-void __fill(void * array, int len, double val, Type type){
-
-	switch(type) {
-		case INT:
-			{
-				int ival = (int)val;
-				for (int i=0; i<len; i++) {
-					((int8_t *)array)[i] = ival;
-				}
-				break;
-			}
-		case FLT:
-			{
-				float fval = (float)val;
-				for (int i=0; i<len; i++) {
-					((float *)array)[i] = fval;
-				}
-				break;
-			}
-		case DBL:
-			{
-				double dval = (double)val;
-				for (int i=0; i<len; i++) {
-					((double *)array)[i] = dval;
-				}
-				break;
-			}
-	}
-	
-}
-
-int64_t __counti8(ArrayI8 array, int8_t val) {
-	int64_t count = 0;
-	for (int i=0; i<array.len; i++) {
-		if (array.array[i] == val) {
-			count++;
-		}
-	}
-	return count;
 }
 
 double __max(void * array, int len, Type type) {
