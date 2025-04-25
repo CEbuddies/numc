@@ -95,6 +95,12 @@ XArray __zeros(Sh s, Type type){
 
 }
 
+int64_t el_from_shape(Sh s) {
+	int64_t elements;
+	elements = s.sh[0] * s.sh[1] * s.sh[2] * s.sh[3];
+	return elements;
+}
+
 char * get_typestr(Type type) {
 	char * name[8];
 	switch (type) {
