@@ -17,7 +17,7 @@ typedef union {
         int s3;
     } shapef;
     int sh[4];
-} Shape;
+} Sh;
 
 
 // can be used to find a value for exmaple
@@ -37,7 +37,7 @@ typedef enum {
 
 typedef struct {
 	int len;
-	Shape s;
+	Sh s;
 	Type type;
 } XShape;
 
@@ -60,27 +60,11 @@ typedef struct {
 } XArray;
 
 typedef struct {
-	ArrayI (*zeros)(int len);
-	void (*fill)(ArrayI array, int8_t val);
-} Int;
-
-typedef struct {
-	ArrayI8 (*zeros)(int len);
-	Tuple (*where)(ArrayI8 array, int val);
-	ArrayI (*whereAll)(ArrayI8 array, int8_t val);
-	void (*fill)(ArrayI8 array, int8_t val);
-	size_t (*count)(ArrayI8 array, int8_t val);
-} Int8;
-
-typedef struct {
-    Array (*randint)(int len);
-    ArrayI (*zeros)(int len); 
+    XArray (*randint)(int len);
+    XArray (*zeros)(Sh s, Type type);
     double (*max)(void * array, int len, Type type); // should take any array
-    int (*min)(Array array);
     double (*scalar)(void * a1, void * a2, int len, Type type);
     void (*fill)(void * array, int len, double val, Type type);
-    Int I;
-    Int8 I8;
 } NumC;
 
 
@@ -90,7 +74,7 @@ static int * __intcast(void * array) {
 	return (int*)array;
 }
 
-Array rint_(int len){
+XArray rint_(int len){
     int * array = calloc(len, sizeof(int));
     srand(time(NULL));
     int r;
@@ -105,23 +89,33 @@ Array rint_(int len){
     
     return r_array;
 }
-ArrayI __zeros(int len){
-	ArrayI array;
-	array.len = len;
-	array.type = INT;
-	array.array = calloc(len, sizeof(int8_t));
 
-	return array;
+XArray __zeros(Sh s, Type type){
+	XArray xarray = {{s.sh[0], s, type}, NULL};
+
 }
 
-ArrayI8 __zerosi8(int len){
-	ArrayI8 array;
-	array.len = len;
-	array.type = INT;
-	array.array = calloc(len, sizeof(int8_t));
-	return array;
+char * get_typestr(Type type) {
+	char * name[8];
+	switch (type) {
+		case INT:
+			name[0] = "int";
+			break;
+		case FLT:
+			name[0] = "float";
+			break;
+		case DBL:
+			name[0] = "double";
+			break;
+	}
+	return name[0];
 }
 
+void shape(XArray array) {
+	char * typename = get_typestr(array.shape.type);
+	printf("SHAPE OF ARRAY\n");
+	printf("Arraylen: %i\nArraytype: %s\n", array.shape.len, typename);
+}
 
 double __isum(ArrayI array) {
 	double sum = 0;
