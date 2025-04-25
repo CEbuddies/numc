@@ -49,6 +49,7 @@ typedef struct {
 typedef struct {
     XArray (*randint)(Sh s, Type type);
     XArray (*zeros)(Sh s, Type type);
+    XArray (*arange)(double start, double stop, Sh s, Type type);
     double (*max)(void * array, int len, Type type); // should take any array
     double (*scalar)(void * a1, void * a2, int len, Type type);
     void (*fill)(XArray array, double val);
@@ -132,6 +133,25 @@ void __fill(XArray array, double val) {
 	
 }
 
+XArray __arange(double start, double stop, Sh s, Type type) {
+	XArray array = {{s.sh[0], s, type}, NULL};
+	if (s.sh[1] > 1 || s.sh[2] > 1 || s.sh[3] > 1) {
+		printf("Not supported\n");
+		// also set an error flag
+	}
+	else {
+		int len = s.sh[0];
+		int diff = stop - start;
+		double stepwidth = (double)diff / len;
+		XArray array = __zeros(s, type);
+		int * arr = (int*)array.array;
+		for (int i=0; i<len; i++){
+			arr[i] = i * stepwidth + start;
+		}
+	}
+	return array;
+}
+
 double __sum(XArray array) {
 	double sum = 0;
 
@@ -182,6 +202,7 @@ NumC numcinit(){
     nc.max = &__max;
     nc.scalar = &__std_scalar;
     nc.fill = &__fill;
+    nc.arange = &__arange;
     return nc;
 }
 
