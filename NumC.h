@@ -91,9 +91,10 @@ XArray __zeros(Sh s, Type type){
 
 XArray rint_(Sh s, Type type){
     XArray array = __zeros(s, type);
+    int64_t elements = el_from_shape(s);
     srand(time(NULL));
     int * rarr = (int*)array.array;
-    for (int i=0; i<array.shape.len; i++){
+    for (int i=0; i<elements; i++){
         rarr[i] = rand();
     }
     return array;
@@ -122,12 +123,13 @@ void shape(XArray array) {
 }
 
 void __fill(XArray array, double val) {
-	if (array.shape.type == INT){
-		int * locarr = (int*)array.array;
-		for (int i=0; i<array.shape.len; i++){
-			locarr[i] = val;
-		}
+	int64_t elements = el_from_shape(array.shape.s);
+	printf("Filling in for %li elements\n", elements);
+	int * arr = (int*)array.array;
+	for (int i=0; i<elements; i++){
+		arr[i] = (int)val;
 	}
+	
 }
 
 double __sum(XArray array) {
@@ -179,6 +181,7 @@ NumC numcinit(){
     nc.randint = &rint_;
     nc.max = &__max;
     nc.scalar = &__std_scalar;
+    nc.fill = &__fill;
     return nc;
 }
 
