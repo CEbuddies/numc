@@ -49,6 +49,7 @@ int main(){
     fill_lines(arr, 4);
     print_lines(arr);
     nc.fill(arr, 6);
+    XArray aranged = nc.arange(0, 10, SHAPE(10, 1, 1, 1), DBL);
 
     // nc.shape(arr);
 
