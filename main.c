@@ -18,6 +18,7 @@ int main(){
     NumC nc = numcinit(); // "import" numpy
     const int TEST_ARR_LEN = 7;
     XArray arr = nc.zeros(SHAPE(TEST_ARR_LEN, 1, 1, 1), INT);
+    nc.shape(arr);
 
     return 0;
 }
