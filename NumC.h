@@ -19,6 +19,7 @@ typedef union {
     int sh[4];
 } Shape;
 
+
 // can be used to find a value for exmaple
 typedef struct {
 	size_t idx;
@@ -34,13 +35,13 @@ typedef enum {
     DBL
 } Type;
 
-// standard array with a void pointer
 typedef struct {
-    void * array;
-    int len;
-    Type type;
-} Array;
+	int len;
+	Shape s;
+	Type type;
+} XShape;
 
+// standard array with a void pointer
 typedef struct {
     int * array;
     int len;
@@ -52,6 +53,11 @@ typedef struct {
     int len;
     Type type;
 } ArrayI8;
+
+typedef struct {
+	XShape shape;
+	void * array;
+} XArray;
 
 typedef struct {
 	ArrayI (*zeros)(int len);
