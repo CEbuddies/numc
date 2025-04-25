@@ -8,6 +8,8 @@
  * - sort out int vs. int8
  * - testing?
  * - multidimensional arrays implementation using shape
+ * - reading into an array from a file pointer
+ * - error handling
 */
 
 

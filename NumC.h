@@ -209,8 +209,8 @@ void __fill(void * array, int len, double val, Type type){
 	
 }
 
-size_t __counti8(ArrayI8 array, int8_t val) {
-	size_t count = 0;
+int64_t __counti8(ArrayI8 array, int8_t val) {
+	int64_t count = 0;
 	for (int i=0; i<array.len; i++) {
 		if (array.array[i] == val) {
 			count++;
