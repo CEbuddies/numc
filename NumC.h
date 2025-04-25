@@ -74,31 +74,41 @@ static int * __intcast(void * array) {
 	return (int*)array;
 }
 
-XArray rint_(int len){
-    int * array = calloc(len, sizeof(int));
-    srand(time(NULL));
-    int r;
-    for (int i=0; i<len; i++){
-        array[i] = rand();
-    }
-    // fill the array
-    Array r_array;
-    r_array.array = array;
-    r_array.len = len;
-    r_array.type = INT;
-    
-    return r_array;
-}
 
-XArray __zeros(Sh s, Type type){
-	XArray xarray = {{s.sh[0], s, type}, NULL};
-
-}
 
 int64_t el_from_shape(Sh s) {
 	int64_t elements;
 	elements = s.sh[0] * s.sh[1] * s.sh[2] * s.sh[3];
 	return elements;
+}
+
+XArray __zeros(Sh s, Type type){
+	XArray xarray = {{s.sh[0], s, type}, NULL};
+	int64_t elements = el_from_shape(s);
+
+	switch(type) {
+		case INT:
+			xarray.array = calloc(elements, sizeof(int));
+			break;
+		case FLT:
+			xarray.array = calloc(elements, sizeof(float));
+			break;
+		case DBL:
+			xarray.array = calloc(elements, sizeof(double));
+			break;
+	}
+	return xarray;
+
+}
+
+XArray rint_(Sh s, Type type){
+    XArray array = __zeros(s, type);
+    srand(time(NULL));
+    int * rarr = (int*)array.array;
+    for (int i=0; i<array.shape.len; i++){
+        rarr[i] = rand();
+    }
+    return array;
 }
 
 char * get_typestr(Type type) {
@@ -121,14 +131,6 @@ void shape(XArray array) {
 	char * typename = get_typestr(array.shape.type);
 	printf("SHAPE OF ARRAY\n");
 	printf("Arraylen: %i\nArraytype: %s\n", array.shape.len, typename);
-}
-
-double __isum(ArrayI array) {
-	double sum = 0;
-	for (int i=0; i<array.len; i++) {
-		sum += array.array[i];
-	}
-	return sum;
 }
 
 double __sum(void * array, int len, Type type) {
