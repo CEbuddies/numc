@@ -133,17 +133,15 @@ void shape(XArray array) {
 	printf("Arraylen: %i\nArraytype: %s\n", array.shape.len, typename);
 }
 
-double __sum(void * array, int len, Type type) {
+double __sum(XArray array) {
 	double sum = 0;
-	if (type == INT){
-		for (int i=0; i<len; i++){
-			sum += ((int8_t *)array)[i];
+
+	if (array.shape.type == INT){
+		int * locarr = (int*)array.array;
+		for (int i=0; i<array.shape.len; i++){
+			sum += locarr[i];
 		}
-	} else if (type == DBL){
-		for (int i=0; i<len; i++){
-			sum += ((double *)array)[i];
-		}
-	}
+	}	
 	return sum;
 }
 
