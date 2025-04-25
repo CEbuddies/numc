@@ -27,7 +27,7 @@ typedef struct {
 } Tuple;
 
 #define SHAPE(a, b, c, d) \
-    ((Shape) {.sh[0]=a, .sh[1]=b, .sh[2]=c, .sh[3]=d})
+    ((Sh) {.sh[0]=a, .sh[1]=b, .sh[2]=c, .sh[3]=d})
 
 typedef enum {
     INT,
@@ -41,26 +41,13 @@ typedef struct {
 	Type type;
 } XShape;
 
-// standard array with a void pointer
-typedef struct {
-    int * array;
-    int len;
-    Type type;
-} ArrayI;
-
-typedef struct {
-    int8_t * array;
-    int len;
-    Type type;
-} ArrayI8;
-
 typedef struct {
 	XShape shape;
 	void * array;
 } XArray;
 
 typedef struct {
-    XArray (*randint)(int len);
+    XArray (*randint)(Sh s, Type type);
     XArray (*zeros)(Sh s, Type type);
     double (*max)(void * array, int len, Type type); // should take any array
     double (*scalar)(void * a1, void * a2, int len, Type type);
@@ -262,14 +249,6 @@ NumC numcinit(){
     nc.randint = &rint_;
     nc.max = &__max;
     nc.scalar = &__std_scalar;
-    nc.I.zeros = &__zeros;
-    nc.I8.zeros = &__zerosi8;
-    nc.I8.where = &__where;
-    nc.I8.whereAll = &__whereAll;
-    nc.I8.fill = &__filli8;
-    nc.I8.count = &__counti8;
-    nc.I.fill = &__fill;
-    // nc.scalar = &std_scalar;
     return nc;
 }
 
