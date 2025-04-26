@@ -49,7 +49,7 @@ typedef struct {
 typedef struct {
     XArray (*randint)(Sh s, Type type);
     XArray (*zeros)(Sh s, Type type);
-    XArray (*arange)(double start, double stop, Sh s, Type type);
+    XArray (*arange)(double start, double stop, int len, Type type);
     double (*max)(void * array, int len, Type type); // should take any array
     double (*scalar)(void * a1, void * a2, int len, Type type);
     void (*fill)(XArray array, double val);
