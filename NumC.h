@@ -63,6 +63,15 @@ static int * __intcast(void * array) {
 	return (int*)array;
 }
 
+static void check_shape(Sh s) {
+	// loop over shape	
+	for (int i=0; i<4; i++){
+		if (s.sh[i] < 0) {
+			printf("ERROR: Negative shapes are not possible!\n");
+			exit(1);
+		}
+	}
+}
 
 
 int64_t el_from_shape(Sh s) {
@@ -72,6 +81,7 @@ int64_t el_from_shape(Sh s) {
 }
 
 XArray __zeros(Sh s, Type type){
+	check_shape(s);
 	XArray xarray = {{s.sh[0], s, type}, NULL};
 	int64_t elements = el_from_shape(s);
 
