@@ -26,18 +26,7 @@ void print_lines(XArray exarr) {
 		printf("\n");
 	}
 }
-void fill_lines(XArray exarray, double val) {
-	int lines = exarray.shape.s.sh[0];
-	int cols = exarray.shape.s.sh[1];
-	int64_t pos = 0;
-	int * arr = ((int*) exarray.array);
-	for (int i=0; i<lines; i++) {
-		for (int j=0; j<cols; j++) {
-			pos = i * cols + j;
-			arr[pos] = (int)val;
-		}
-	}
-}
+
 int main(){
     printf("NumC testsuite!\n");
     NumC nc = numcinit(); // "import" numpy
@@ -46,10 +35,10 @@ int main(){
     XArray randarr = nc.randint(SHAPE(TEST_ARR_LEN, 4, 1, 1), INT);
     // nc.fill(arr, 4);
     print_lines(randarr);
-    fill_lines(arr, 4);
     print_lines(arr);
     nc.fill(arr, 6);
     XArray aranged = nc.arange(0, 10, SHAPE(10, 1, 1, 1), DBL);
+    print_lines(aranged);
 
     // nc.shape(arr);
 
