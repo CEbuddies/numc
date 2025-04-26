@@ -32,11 +32,12 @@ int main(){
     NumC nc = numcinit(); // "import" numpy
     const int TEST_ARR_LEN = 2;
     // nc.fill(arr, 4);
-    XArray aranged = nc.arange(0, 10, SHAPE(10, 1, 1, 1), DBL);
+    XArray aranged = nc.arange(0, 10, 10, DBL);
     double * testarr = (double*)aranged.array;
     printf("DEBUG: Array pointing to %p\n", aranged.array);
     printf("DEBUG: Pointing to %p\n", (void*)testarr);
     printf("Testarr: %lf\n", testarr[3]);
+    XArray fail = nc.zeros(SHAPE(10, -1, 1, 1), DBL);
 
 
     // nc.shape(arr);
