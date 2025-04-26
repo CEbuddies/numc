@@ -134,21 +134,25 @@ void __fill(XArray array, double val) {
 }
 
 XArray __arange(double start, double stop, Sh s, Type type) {
-	XArray array = {{s.sh[0], s, type}, NULL};
+	XArray array = __zeros(s, type);
+	double * locarr = (double*)array.array;
 	if (s.sh[1] > 1 || s.sh[2] > 1 || s.sh[3] > 1) {
 		printf("Not supported\n");
 		// also set an error flag
 	}
 	else {
-		int len = s.sh[0];
+		printf("DEBUG: Aranging array of len: %i and type %s\n",
+				array.shape.len, get_typestr(type));
 		int diff = stop - start;
-		double stepwidth = (double)diff / len;
-		XArray array = __zeros(s, type);
-		int * arr = (int*)array.array;
-		for (int i=0; i<len; i++){
-			arr[i] = i * stepwidth + start;
+		double stepwidth = (double)diff / array.shape.len;
+		printf("DEBUG: Pointer array: %p \n", array.array);
+		for (int i=0; i<array.shape.len; i++){
+			printf("DEBUG: Pointer is at %p\n", array.array);
+			locarr[i] = start + (stepwidth * i);
 		}
 	}
+	array.array = locarr;
+	printf("DEBUG: Pointer before returning %p\n", array.array);
 	return array;
 }
 
