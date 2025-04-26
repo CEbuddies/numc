@@ -31,14 +31,13 @@ int main(){
     printf("NumC testsuite!\n");
     NumC nc = numcinit(); // "import" numpy
     const int TEST_ARR_LEN = 2;
-    XArray arr = nc.zeros(SHAPE(TEST_ARR_LEN, 1, 1, 1), INT);
-    XArray randarr = nc.randint(SHAPE(TEST_ARR_LEN, 4, 1, 1), INT);
     // nc.fill(arr, 4);
-    print_lines(randarr);
-    print_lines(arr);
-    nc.fill(arr, 6);
     XArray aranged = nc.arange(0, 10, SHAPE(10, 1, 1, 1), DBL);
-    print_lines(aranged);
+    double * testarr = (double*)aranged.array;
+    printf("DEBUG: Array pointing to %p\n", aranged.array);
+    printf("DEBUG: Pointing to %p\n", (void*)testarr);
+    printf("Testarr: %lf\n", testarr[3]);
+
 
     // nc.shape(arr);
 
