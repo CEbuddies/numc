@@ -51,7 +51,7 @@ typedef struct {
     XArray (*zeros)(Sh s, Type type);
     XArray (*arange)(double start, double stop, int len, Type type);
     double (*max)(void * array, int len, Type type); // should take any array
-    double (*scalar)(void * a1, void * a2, int len, Type type);
+    double (*dot)(XArray a1, XArray a2);
     void (*fill)(XArray array, double val);
     void (*shape)(XArray array);
 } NumC;
@@ -61,6 +61,14 @@ NumC numcinit();
 
 static int * __intcast(void * array) {
 	return (int*)array;
+}
+
+static double * __doublecast(void * array) {
+	return (double*)array;
+}
+
+static float * __floatcast(void * array) {
+	return (float*)array;
 }
 
 static void check_shape(Sh s) {
@@ -185,19 +193,17 @@ double __max(void * array, int len, Type type) {
 	return max;
 }
 // std scalar product for arbitray types with void * pointers
-double __std_scalar(void * a1, void * a2, int len, Type type){
+double __std_scalar(XArray a1, XArray a2){
 
-    double sum = 0;
-    if (type == INT){
-	for (int i=0; i<len; i++){
-	    sum += ((int8_t *)a1)[i] * ((int8_t *)a2)[i];
-	}
-    } else if (type == DBL){
-	for (int i=0; i<len; i++){
-	    sum += ((double *)a1)[i] * ((double *)a2)[i];
-	}
-    }
-    return sum;
+    	double sum = 0;
+    // check the shapes
+	int * locarr1 = (int*)a1.array;
+	int * locarr2 = (int*)a2.array;
+	for (int i=0; i<a1.shape.len; i++){
+		sum += (double)locarr1[i] * (double)locarr2[i];
+		printf("DEBUG: Sum is: %lf\n", sum);
+	}    
+    	return sum;
 }
 
 // how to clear this later?
@@ -209,7 +215,7 @@ NumC numcinit(){
     nc.zeros = &__zeros;
     nc.randint = &rint_;
     nc.max = &__max;
-    nc.scalar = &__std_scalar;
+    nc.dot = &__std_scalar;
     nc.fill = &__fill;
     nc.arange = &__arange;
     return nc;

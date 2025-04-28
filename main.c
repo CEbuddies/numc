@@ -37,6 +37,14 @@ int main(){
     printf("DEBUG: Array pointing to %p\n", aranged.array);
     printf("DEBUG: Pointing to %p\n", (void*)testarr);
     printf("Testarr: %lf\n", testarr[3]);
+
+
+    XArray dot1 = nc.zeros(SHAPE(10, 10, 1, 1), INT);
+    XArray dot2 = nc.zeros(SHAPE(10, 10, 1, 1), INT);
+	nc.fill(dot1, 1);
+	nc.fill(dot2, 2);
+	double dotres = nc.dot(dot1, dot2);
+	printf("Dot result: %lf\n", dotres);
     XArray fail = nc.zeros(SHAPE(10, -1, 1, 1), DBL);
 
 
