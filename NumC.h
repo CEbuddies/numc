@@ -54,6 +54,7 @@ typedef struct {
     double (*dot)(XArray a1, XArray a2);
     void (*fill)(XArray array, double val);
     void (*shape)(XArray array);
+    int (*free)(XArray array);
 } NumC;
 
 
@@ -79,6 +80,11 @@ static void check_shape(Sh s) {
 			exit(1);
 		}
 	}
+}
+
+int __free(XArray array) {
+    	free(array.array);
+    	return 0;
 }
 
 
@@ -218,6 +224,7 @@ NumC numcinit(){
     nc.dot = &__std_scalar;
     nc.fill = &__fill;
     nc.arange = &__arange;
+    nc.free = &__free;
     return nc;
 }
 
