@@ -45,7 +45,9 @@ int main(){
 	nc.fill(dot2, 2);
 	double dotres = nc.dot(dot1, dot2);
 	printf("Dot result: %lf\n", dotres);
+	nc.free(aranged);
     XArray fail = nc.zeros(SHAPE(10, -1, 1, 1), DBL);
+
 
 
     // nc.shape(arr);
