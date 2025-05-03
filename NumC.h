@@ -10,13 +10,13 @@
 #define NUMC_H
 
 typedef union {
-    struct {
-        int s0;
-        int s1;
-        int s2;
-        int s3;
-    } shapef;
-    int sh[4];
+	struct {
+		int s0;
+		int s1;
+		int s2;
+		int s3;
+	} shapef;
+	int sh[4];
 } Sh;
 
 
@@ -27,12 +27,12 @@ typedef struct {
 } Tuple;
 
 #define SHAPE(a, b, c, d) \
-    ((Sh) {.sh[0]=a, .sh[1]=b, .sh[2]=c, .sh[3]=d})
+	((Sh) {.sh[0]=a, .sh[1]=b, .sh[2]=c, .sh[3]=d})
 
 typedef enum {
-    INT,
-    FLT,
-    DBL
+	INT,
+	FLT,
+	DBL
 } Type;
 
 typedef struct {
@@ -47,16 +47,16 @@ typedef struct {
 } XArray;
 
 typedef struct {
-    XArray (*randint)(Sh s, Type type);
-    XArray (*zeros)(Sh s, Type type);
-    XArray (*linspace)(double start, double stop, int len, Type type);
-    XArray (*arange)(int start, int stop, int step);
-    double (*max)(void * array, int len, Type type); // should take any array
-    double (*dot)(XArray a1, XArray a2);
-    double (*sum)(XArray array);
-    void (*fill)(XArray array, double val);
-    void (*shape)(XArray array);
-    int (*free)(XArray array);
+	XArray (*randint)(Sh s, Type type);
+	XArray (*zeros)(Sh s, Type type);
+	XArray (*linspace)(double start, double stop, int len, Type type);
+	XArray (*arange)(int start, int stop, int step);
+	double (*max)(void * array, int len, Type type); // should take any array
+	double (*dot)(XArray a1, XArray a2);
+	double (*sum)(XArray array);
+	void (*fill)(XArray array, double val);
+	void (*shape)(XArray array);
+	int (*free)(XArray array);
 } NumC;
 
 
@@ -85,8 +85,8 @@ static void check_shape(Sh s) {
 }
 
 int __free(XArray array) {
-    	free(array.array);
-    	return 0;
+	free(array.array);
+	return 0;
 }
 
 
@@ -117,14 +117,14 @@ XArray __zeros(Sh s, Type type){
 }
 
 XArray rint_(Sh s, Type type){
-    XArray array = __zeros(s, type);
-    int64_t elements = el_from_shape(s);
-    srand(time(NULL));
-    int * rarr = (int*)array.array;
-    for (int i=0; i<elements; i++){
-        rarr[i] = rand();
-    }
-    return array;
+	XArray array = __zeros(s, type);
+	int64_t elements = el_from_shape(s);
+	srand(time(NULL));
+	int * rarr = (int*)array.array;
+	for (int i=0; i<elements; i++){
+		rarr[i] = rand();
+	}
+	return array;
 }
 
 char * get_typestr(Type type) {
@@ -156,7 +156,7 @@ void __fill(XArray array, double val) {
 	for (int i=0; i<elements; i++){
 		arr[i] = (int)val;
 	}
-	
+
 }
 // TODO: arange does usually return int and gets either start, or start, stop, step
 // This is rather like np.linspace and should therefore be renamed
@@ -206,39 +206,39 @@ double __max(void * array, int len, Type type) {
 			max = localarray[i];
 		}
 	}
-	
+
 	return max;
 }
 // std scalar product for arbitray types with void * pointers
 double __std_scalar(XArray a1, XArray a2){
 
-    	double sum = 0;
-    // check the shapes
+	double sum = 0;
+	// check the shapes
 	int * locarr1 = (int*)a1.array;
 	int * locarr2 = (int*)a2.array;
 	for (int i=0; i<a1.shape.len; i++){
 		sum += (double)locarr1[i] * (double)locarr2[i];
 		printf("DEBUG: Sum is: %lf\n", sum);
 	}    
-    	return sum;
+	return sum;
 }
 
 // how to clear this later?
 NumC numcinit(){
 
-    NumC nc;
-    // nc.max = &__maxint;
-    // nc.min = &__minint;
-    nc.zeros = &__zeros;
-    nc.randint = &rint_;
-    nc.max = &__max;
-    nc.dot = &__std_scalar;
-    nc.sum = &__sum;
-    nc.fill = &__fill;
-    nc.linspace = &__linspace;
-    nc.arange = &__arange;
-    nc.free = &__free;
-    return nc;
+	NumC nc;
+	// nc.max = &__maxint;
+	// nc.min = &__minint;
+	nc.zeros = &__zeros;
+	nc.randint = &rint_;
+	nc.max = &__max;
+	nc.dot = &__std_scalar;
+	nc.sum = &__sum;
+	nc.fill = &__fill;
+	nc.linspace = &__linspace;
+	nc.arange = &__arange;
+	nc.free = &__free;
+	return nc;
 }
 
 #endif
