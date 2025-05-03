@@ -49,7 +49,7 @@ typedef struct {
 typedef struct {
     XArray (*randint)(Sh s, Type type);
     XArray (*zeros)(Sh s, Type type);
-    XArray (*arange)(double start, double stop, int len, Type type);
+    XArray (*linspace)(double start, double stop, int len, Type type);
     double (*max)(void * array, int len, Type type); // should take any array
     double (*dot)(XArray a1, XArray a2);
     void (*fill)(XArray array, double val);
@@ -158,7 +158,7 @@ void __fill(XArray array, double val) {
 }
 // TODO: arange does usually return int and gets either start, or start, stop, step
 // This is rather like np.linspace and should therefore be renamed
-XArray __arange(double start, double stop, int len, Type type) {
+XArray __linspace(double start, double stop, int len, Type type) {
 	XArray array = __zeros(SHAPE(len, 1, 1, 1), type);
 	double * locarr = (double*)array.array;
 
@@ -223,7 +223,7 @@ NumC numcinit(){
     nc.max = &__max;
     nc.dot = &__std_scalar;
     nc.fill = &__fill;
-    nc.arange = &__arange;
+    nc.linspace = &__linspace;
     nc.free = &__free;
     return nc;
 }
