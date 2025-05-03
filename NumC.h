@@ -50,6 +50,7 @@ typedef struct {
     XArray (*randint)(Sh s, Type type);
     XArray (*zeros)(Sh s, Type type);
     XArray (*linspace)(double start, double stop, int len, Type type);
+    XArray (*arange)(int start, int stop, int step);
     double (*max)(void * array, int len, Type type); // should take any array
     double (*dot)(XArray a1, XArray a2);
     void (*fill)(XArray array, double val);
@@ -175,6 +176,15 @@ XArray __linspace(double start, double stop, int len, Type type) {
 	return array;
 }
 
+XArray __arange(int start, int stop, int step) {
+	XArray array = __zeros(SHAPE(stop-start, 1, 1, 1), INT);
+	int * locarr = (int*)array.array;
+	for (int i=0; i<array.shape.len; i++){
+		locarr[i] = start + (step * i);
+	}
+	return array;
+}
+
 double __sum(XArray array) {
 	double sum = 0;
 
@@ -224,6 +234,7 @@ NumC numcinit(){
     nc.dot = &__std_scalar;
     nc.fill = &__fill;
     nc.linspace = &__linspace;
+    nc.arange = &__arange;
     nc.free = &__free;
     return nc;
 }
