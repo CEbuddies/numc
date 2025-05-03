@@ -32,7 +32,7 @@ int main(){
     NumC nc = numcinit(); // "import" numpy
     const int TEST_ARR_LEN = 2;
     // nc.fill(arr, 4);
-    XArray aranged = nc.arange(0, 10, 10, DBL);
+    XArray aranged = nc.linspace(0, 10, 10, DBL);
     double * testarr = (double*)aranged.array;
     printf("DEBUG: Array pointing to %p\n", aranged.array);
     printf("DEBUG: Pointing to %p\n", (void*)testarr);
