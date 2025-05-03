@@ -53,6 +53,7 @@ typedef struct {
     XArray (*arange)(int start, int stop, int step);
     double (*max)(void * array, int len, Type type); // should take any array
     double (*dot)(XArray a1, XArray a2);
+    double (*sum)(XArray array);
     void (*fill)(XArray array, double val);
     void (*shape)(XArray array);
     int (*free)(XArray array);
@@ -232,6 +233,7 @@ NumC numcinit(){
     nc.randint = &rint_;
     nc.max = &__max;
     nc.dot = &__std_scalar;
+    nc.sum = &__sum;
     nc.fill = &__fill;
     nc.linspace = &__linspace;
     nc.arange = &__arange;
