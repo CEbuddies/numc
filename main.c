@@ -32,7 +32,8 @@ int main(){
     NumC nc = numcinit(); // "import" numpy
     const int TEST_ARR_LEN = 2;
     // nc.fill(arr, 4);
-    XArray aranged = nc.linspace(0, 10, 10, DBL);
+    XArray linspaced = nc.linspace(0, 10, 10, DBL);
+	XArray aranged = nc.arange(0, 6, 1);
     double * testarr = (double*)aranged.array;
     printf("DEBUG: Array pointing to %p\n", aranged.array);
     printf("DEBUG: Pointing to %p\n", (void*)testarr);
@@ -45,7 +46,8 @@ int main(){
 	nc.fill(dot2, 2);
 	double dotres = nc.dot(dot1, dot2);
 	printf("Dot result: %lf\n", dotres);
-	nc.free(aranged);
+	nc.free(linspaced);
+	printf("Sum aranged: %i\n", nc.sum(aranged));
     XArray fail = nc.zeros(SHAPE(10, -1, 1, 1), DBL);
 
 
