@@ -177,6 +177,14 @@ XArray __linspace(double start, double stop, int len, Type type) {
 	return array;
 }
 
+/**
+ * @brief Returns a 1D of type INT aranged from start to stop with spacing step
+ *
+ * @param[int] start First number of aranged items
+ * @param[int] stop Last number to be included
+ * @param[int] step Step width between two items
+ * @return XAarray
+ */
 XArray __arange(int start, int stop, int step) {
 	XArray array = __zeros(SHAPE(stop-start, 1, 1, 1), INT);
 	int * locarr = (int*)array.array;
@@ -223,7 +231,11 @@ double __std_scalar(XArray a1, XArray a2){
 	return sum;
 }
 
-// how to clear this later?
+/**
+ * @brief Init function for NumC that sets it up (import numpy as np)
+ *
+ * @return NumC nc struct (object) containing all functions
+ */
 NumC numcinit(){
 
 	NumC nc;
