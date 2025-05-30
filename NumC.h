@@ -62,16 +62,16 @@ typedef struct {
 
 NumC numcinit();
 
-static int * __intcast(void * array) {
-	return (int*)array;
+static int * __intcast(XArray array) {
+	return (int*)array.array;
 }
 
-static double * __doublecast(void * array) {
-	return (double*)array;
+static double * __doublecast(XArray array) {
+	return (double*)array.array;
 }
 
-static float * __floatcast(void * array) {
-	return (float*)array;
+static float * __floatcast(XArray array) {
+	return (float*)array.array;
 }
 
 static void check_shape(Sh s) {
@@ -158,7 +158,7 @@ void __fill(XArray array, double val) {
 	switch (array.shape.type) {
 		case INT:
 			{
-			int * arr = (int*)array.array;
+			int * arr = __intcast(array);
 			for (int i=0; i<elements; i++){
 				arr[i] = (int)val;
 			}
@@ -166,7 +166,7 @@ void __fill(XArray array, double val) {
 			}
 		case FLT:
 			{
-			float * arr = (float*)array.array;
+			float * arr = __floatcast(array);
 			for (int i=0; i<elements; i++){
 				arr[i] = (float)val;
 			}
@@ -174,7 +174,7 @@ void __fill(XArray array, double val) {
 			}
 		case DBL:
 			{
-			double * arr = (double*)array.array;
+			double * arr = __doublecast(array);
 			for (int i=0; i<elements; i++){
 				arr[i] = val;
 			}
