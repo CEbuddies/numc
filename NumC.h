@@ -165,7 +165,6 @@ XArray __linspace(double start, double stop, int len, Type type) {
 	int diff = stop - start;
 	double stepwidth = (double)diff / array.shape.len;
 	for (int i=0; i<array.shape.len; i++){
-		printf("DEBUG: Pointer is at %p\n", array.array);
 		locarr[i] = start + (stepwidth * i);
 	}
 	return array;
@@ -220,7 +219,6 @@ double __std_scalar(XArray a1, XArray a2){
 	int * locarr2 = (int*)a2.array;
 	for (int i=0; i<a1.shape.len; i++){
 		sum += (double)locarr1[i] * (double)locarr2[i];
-		printf("DEBUG: Sum is: %lf\n", sum);
 	}    
 	return sum;
 }
