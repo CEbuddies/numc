@@ -152,9 +152,34 @@ void shape(XArray array) {
 void __fill(XArray array, double val) {
 	int64_t elements = el_from_shape(array.shape.s);
 	printf("Filling in for %li elements\n", elements);
-	int * arr = (int*)array.array;
-	for (int i=0; i<elements; i++){
-		arr[i] = (int)val;
+
+	void * arr;
+
+	switch (array.shape.type) {
+		case INT:
+			{
+			int * arr = (int*)array.array;
+			for (int i=0; i<elements; i++){
+				arr[i] = (int)val;
+			}
+			break;
+			}
+		case FLT:
+			{
+			float * arr = (float*)array.array;
+			for (int i=0; i<elements; i++){
+				arr[i] = (float)val;
+			}
+			break;
+			}
+		case DBL:
+			{
+			double * arr = (double*)array.array;
+			for (int i=0; i<elements; i++){
+				arr[i] = val;
+			}
+			break;
+			}
 	}
 
 }
