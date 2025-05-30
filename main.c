@@ -35,8 +35,6 @@ int main(){
 	XArray linspaced = nc.linspace(0, 10, 10, DBL);
 	XArray aranged = nc.arange(0, 6, 1);
 	double * testarr = (double*)aranged.array;
-	printf("DEBUG: Array pointing to %p\n", aranged.array);
-	printf("DEBUG: Pointing to %p\n", (void*)testarr);
 	printf("Testarr: %lf\n", testarr[3]);
 
 
