@@ -51,7 +51,7 @@ typedef struct {
 	XArray (*zeros)(Sh s, Type type);
 	XArray (*linspace)(double start, double stop, int len, Type type);
 	XArray (*arange)(int start, int stop, int step);
-	double (*max)(void * array, int len, Type type); // should take any array
+	double (*max)(XArray array); // should take any array
 	double (*dot)(XArray a1, XArray a2);
 	double (*sum)(XArray array);
 	void (*fill)(XArray array, double val);
@@ -224,13 +224,25 @@ double __sum(XArray array) {
 	return sum;
 }
 
-double __max(void * array, int len, Type type) {
+double __max(XArray array) {
 	double max = 0;
-	int8_t * localarray = (int8_t *)array;
-	for (int i=0; i<len; i++) {
-		if (localarray[i] > max) {
-			max = localarray[i];
-		}
+
+	switch (array.shape.type) {
+		case INT:
+			max = 0;
+			int * locarray = (int*)array.array;
+			for (int i=0; i<array.shape.len; i++){
+				if (locarray[i] > max) {
+					max = locarray[i];
+				}
+			}
+			break;
+		case FLT:
+			max = 0;
+			break;
+		case DBL:
+			max = 0;
+			break;
 	}
 
 	return max;
