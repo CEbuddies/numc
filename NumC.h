@@ -242,6 +242,12 @@ double __max(XArray array) {
 			break;
 		case DBL:
 			max = 0;
+			double * locarray_d = __doublecast(array);
+			for (int i=0; i<array.shape.len; i++){
+				if (locarray_d[i] > max) {
+					max = locarray_d[i];
+				}
+			}
 			break;
 	}
 
