@@ -3,59 +3,55 @@
 #include <string.h>
 #include "NumC.h"
 
-void parse_matstring(char * matstr){
-    for (int i=0; i<strlen(matstr); i++){
-        printf("Char number %d: %c\n", i, matstr[i]);
-    }
-}
+/*
+ * TODO
+ * - sort out int vs. int8
+ * - testing?
+ * - multidimensional arrays implementation using shape
+ * - reading into an array from a file pointer
+ * - error handling
+*/
+void print_lines(XArray exarr) {
+	// We assume array is only two dimensional
+	int lines = exarr.shape.s.sh[0];
+	int cols = exarr.shape.s.sh[1];
+	int64_t pos = 0;
+	int * arr = ((int*) exarr.array);
+	for (int i=0; i<lines; i++) {
+		for (int j=0; j<cols; j++) {
+			pos = i * cols + j;
+			printf("%i ", arr[pos]);
 
-typedef struct {
-    int a;
-    int b;
-} SomeStruct;
-    
-Array return_array(void * array, int len){
-    Array arr = {
-        .array = array,
-        .len = len
-    };
-    return arr;
+		}
+		printf("\n");
+	}
 }
 
 int main(){
-    printf("NumC testsuite!\n");
-    NumC nc = numcinit(); // "import" numpy
-    const int TEST_ARR_LEN = 5;
+	printf("NumC testsuite!\n");
+	NumC nc = numcinit(); // "import" numpy
+	const int TEST_ARR_LEN = 2;
+	// nc.fill(arr, 4);
+	XArray linspaced = nc.linspace(0, 10, 10, DBL);
+	XArray aranged = nc.arange(0, 6, 1);
+	double * testarr = (double*)aranged.array;
+	printf("Testarr: %lf\n", testarr[3]);
 
-    Array r_a = nc.randint(TEST_ARR_LEN);
-    Array r_a2 = nc.randint(TEST_ARR_LEN);
-    ArrayD a_d = nc.ranD(23);
-    r_a2.array[0] = -120;
-    // This can be done nicer
-    add_ref(&nc, &r_a); 
-    //for (int i=0; i<TEST_ARR_LEN; i++){
-    //    printf("El %d: %d\n", i, r_a.array[i]);
-    //}
 
-    printf("Max is: %d\n", nc.max(r_a));
-    printf("Min is: %d\n", nc.min(r_a));
-    printf("Scalar product: %lf\n", nc.scalar(r_a2, r_a));
+	XArray dot1 = nc.zeros(SHAPE(10, 10, 1, 1), INT);
+	XArray dot2 = nc.zeros(SHAPE(10, 10, 1, 1), INT);
+	nc.fill(dot1, 1);
+	nc.fill(dot2, 2);
+	double dotres = nc.dot(dot1, dot2);
+	printf("Dot result: %lf\n", dotres);
+	nc.free(linspaced);
+	printf("Sum aranged: %lf\n", nc.sum(aranged));
+	XArray fail = nc.zeros(SHAPE(10, -1, 1, 1), DBL);
 
-    printf("Parsing ... \n");
-    int dim0, dim1, dim2;
-    sscanf("(23, 4,6)", "(%d, %d, %d)", &dim0, &dim1, &dim2);
 
-    printf("Loop through string ...\n");
-    char somestr[] = "123";
-    parse_matstring(somestr);
-    printf("Dimensions: %d, %d, %d\n", dim0, dim1, dim2);
-    SomeStruct ss = {
-        .a = 4,
-        .b = 5
-    };
 
-    // void pointer array returning
-    clean_up(&nc); 
-    return 0;
+	// nc.shape(arr);
+
+	return 0;
 }
 

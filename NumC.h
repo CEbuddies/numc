@@ -1,74 +1,285 @@
-#ifndef CLASSES_H
-#define CLASSES_H
+#include <stdio.h>
+#include <time.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdint.h>
 
-// TODO: for the moment just integers
-// TODO: Can alter have something like free all or similar, but would need tracker then
-//
+// TODO: check if we can generally typecast a struct
 
+#ifndef NUMC_H
+#define NUMC_H
 
-// not easy to make this generic
-// can later become a union or something special where string is parsed
-/*
-typedef struct {
-    int shape0;
-    int shape1;
-    int shape2;
-    int shape3;
-} Shape;
-*/
 typedef union {
-    struct {
-        int s0;
-        int s1;
-        int s2;
-        int s3;
-    } shapef;
-    int sh[4];
-} Shape;
+	struct {
+		int s0;
+		int s1;
+		int s2;
+		int s3;
+	} shapef;
+	int sh[4];
+} Sh;
+
+
+// can be used to find a value for exmaple
+typedef struct {
+	size_t idx;
+	double val;
+} Tuple;
 
 #define SHAPE(a, b, c, d) \
-    ((Shape) {.sh[0]=a, .sh[1]=b, .sh[2]=c, .sh[3]=d})
+	((Sh) {.sh[0]=a, .sh[1]=b, .sh[2]=c, .sh[3]=d})
 
 typedef enum {
-    INT,
-    FLT,
-    DBL
+	INT,
+	FLT,
+	DBL
 } Type;
 
 typedef struct {
-    int * array;
-    int len; // TODO: should be shape or something
-    int shape[5]; // experimental, but is this good?
-} Array;
+	int len;
+	Sh s;
+	Type type;
+} XShape;
 
 typedef struct {
-    double * array;
-    int len; // TODO: should be shape or something
-    int shape[5]; // experimental, but is this good?
-} ArrayD;
+	XShape shape;
+	void * array;
+} XArray;
 
 typedef struct {
-    float * array;
-    int len; // TODO: should be shape or something
-    int shape[5]; // experimental, but is this good?
-} ArrayF;
-
-typedef struct {
-    Array (*randint)(int len);
-    ArrayF (*ranF)(int len);
-    ArrayD (*ranD)(int len);
-    int (*max)(Array array); // should take any array
-    int (*min)(Array array);
-    double (*scalar)(Array a1, Array a2);
-    int ptr_counter;
-    int len_ptr_list;
-    int ** ptr_list;
+	XArray (*randint)(Sh s, Type type);
+	XArray (*zeros)(Sh s, Type type);
+	XArray (*linspace)(double start, double stop, int len, Type type);
+	XArray (*arange)(int start, int stop, int step);
+	double (*max)(XArray array); // should take any array
+	double (*dot)(XArray a1, XArray a2);
+	double (*sum)(XArray array);
+	void (*fill)(XArray array, double val);
+	void (*shape)(XArray array);
+	int (*free)(XArray array);
 } NumC;
 
 
 NumC numcinit();
-int clean_up(NumC * nc);
-void add_ref(NumC * nc, Array * array);
 
+static int * __intcast(XArray array) {
+	return (int*)array.array;
+}
+
+static double * __doublecast(XArray array) {
+	return (double*)array.array;
+}
+
+static float * __floatcast(XArray array) {
+	return (float*)array.array;
+}
+
+static void check_shape(Sh s) {
+	// loop over shape	
+	for (int i=0; i<4; i++){
+		if (s.sh[i] < 0) {
+			printf("ERROR: Negative shapes are not possible!\n");
+			exit(1);
+		}
+	}
+}
+
+int __free(XArray array) {
+	free(array.array);
+	return 0;
+}
+
+
+int64_t el_from_shape(Sh s) {
+	int64_t elements;
+	elements = s.sh[0] * s.sh[1] * s.sh[2] * s.sh[3];
+	return elements;
+}
+
+XArray __zeros(Sh s, Type type){
+	check_shape(s);
+	XArray xarray = {{s.sh[0], s, type}, NULL};
+	int64_t elements = el_from_shape(s);
+
+	switch(type) {
+		case INT:
+			xarray.array = calloc(elements, sizeof(int));
+			break;
+		case FLT:
+			xarray.array = calloc(elements, sizeof(float));
+			break;
+		case DBL:
+			xarray.array = calloc(elements, sizeof(double));
+			break;
+	}
+	return xarray;
+
+}
+
+XArray rint_(Sh s, Type type){
+	XArray array = __zeros(s, type);
+	int64_t elements = el_from_shape(s);
+	srand(time(NULL));
+	int * rarr = (int*)array.array;
+	for (int i=0; i<elements; i++){
+		rarr[i] = rand();
+	}
+	return array;
+}
+
+char * get_typestr(Type type) {
+	char * name[8];
+	switch (type) {
+		case INT:
+			name[0] = "int";
+			break;
+		case FLT:
+			name[0] = "float";
+			break;
+		case DBL:
+			name[0] = "double";
+			break;
+	}
+	return name[0];
+}
+
+void shape(XArray array) {
+	char * typename = get_typestr(array.shape.type);
+	printf("SHAPE OF ARRAY\n");
+	printf("Arraylen: %i\nArraytype: %s\n", array.shape.len, typename);
+}
+
+void __fill(XArray array, double val) {
+	int64_t elements = el_from_shape(array.shape.s);
+	printf("Filling in for %li elements\n", elements);
+
+	void * arr;
+
+	switch (array.shape.type) {
+		case INT:
+			{
+			int * arr = __intcast(array);
+			for (int i=0; i<elements; i++){
+				arr[i] = (int)val;
+			}
+			break;
+			}
+		case FLT:
+			{
+			float * arr = __floatcast(array);
+			for (int i=0; i<elements; i++){
+				arr[i] = (float)val;
+			}
+			break;
+			}
+		case DBL:
+			{
+			double * arr = __doublecast(array);
+			for (int i=0; i<elements; i++){
+				arr[i] = val;
+			}
+			break;
+			}
+	}
+
+}
+XArray __linspace(double start, double stop, int len, Type type) {
+	XArray array = __zeros(SHAPE(len, 1, 1, 1), type);
+	double * locarr = (double*)array.array;
+
+	int diff = stop - start;
+	double stepwidth = (double)diff / array.shape.len;
+	for (int i=0; i<array.shape.len; i++){
+		locarr[i] = start + (stepwidth * i);
+	}
+	return array;
+}
+
+/**
+ * @brief Returns a 1D of type INT aranged from start to stop with spacing step
+ *
+ * @param[int] start First number of aranged items
+ * @param[int] stop Last number to be included
+ * @param[int] step Step width between two items
+ * @return XAarray
+ */
+XArray __arange(int start, int stop, int step) {
+	XArray array = __zeros(SHAPE(stop-start, 1, 1, 1), INT);
+	int * locarr = (int*)array.array;
+	for (int i=0; i<array.shape.len; i++){
+		locarr[i] = start + (step * i);
+	}
+	return array;
+}
+
+double __sum(XArray array) {
+	double sum = 0;
+
+	if (array.shape.type == INT){
+		int * locarr = (int*)array.array;
+		for (int i=0; i<array.shape.len; i++){
+			sum += locarr[i];
+		}
+	}	
+	return sum;
+}
+
+double __max(XArray array) {
+	double max = 0;
+
+	switch (array.shape.type) {
+		case INT:
+			max = 0;
+			int * locarray = (int*)array.array;
+			for (int i=0; i<array.shape.len; i++){
+				if (locarray[i] > max) {
+					max = locarray[i];
+				}
+			}
+			break;
+		case FLT:
+			max = 0;
+			break;
+		case DBL:
+			max = 0;
+			break;
+	}
+
+	return max;
+}
+// std scalar product for arbitray types with void * pointers
+double __std_scalar(XArray a1, XArray a2){
+
+	double sum = 0;
+	// check the shapes
+	int * locarr1 = (int*)a1.array;
+	int * locarr2 = (int*)a2.array;
+	for (int i=0; i<a1.shape.len; i++){
+		sum += (double)locarr1[i] * (double)locarr2[i];
+	}    
+	return sum;
+}
+
+/**
+ * @brief Init function for NumC that sets it up (import numpy as np)
+ *
+ * @return NumC nc struct (object) containing all functions
+ */
+NumC numcinit(){
+
+	NumC nc;
+	// nc.max = &__maxint;
+	// nc.min = &__minint;
+	nc.zeros = &__zeros;
+	nc.randint = &rint_;
+	nc.max = &__max;
+	nc.dot = &__std_scalar;
+	nc.sum = &__sum;
+	nc.fill = &__fill;
+	nc.linspace = &__linspace;
+	nc.arange = &__arange;
+	nc.free = &__free;
+	return nc;
+}
 
 #endif
