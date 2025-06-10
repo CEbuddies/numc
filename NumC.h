@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
@@ -224,31 +225,40 @@ double __sum(XArray array) {
 	return sum;
 }
 
+double __maxint(int * array, size_t len) {
+	double max = 0;
+	for (int i=0; i<len; i++){
+		if (array[i] > max) {
+			max = array[i];
+		}
+	}
+	return max;
+}
+
 double __max(XArray array) {
 	double max = 0;
 
 	switch (array.shape.type) {
 		case INT:
-			max = 0;
+			{
 			int * locarray = (int*)array.array;
+			max = __maxint(locarray, array.shape.len);
+			break;
+			}
+		case FLT:
+			max = 0;
+			break;
+		case DBL:
+			{
+			max = 0;
+			double * locarray = __doublecast(array);
 			for (int i=0; i<array.shape.len; i++){
 				if (locarray[i] > max) {
 					max = locarray[i];
 				}
 			}
 			break;
-		case FLT:
-			max = 0;
-			break;
-		case DBL:
-			max = 0;
-			double * locarray_d = __doublecast(array);
-			for (int i=0; i<array.shape.len; i++){
-				if (locarray_d[i] > max) {
-					max = locarray_d[i];
-				}
 			}
-			break;
 	}
 
 	return max;
