@@ -235,6 +235,16 @@ double __maxint(int * array, size_t len) {
 	return max;
 }
 
+double __maxdbl(double * array, size_t len) {
+	double max = 0;
+	for (int i=0; i<len; i++){
+		if (array[i] > max) {
+			max = array[i];
+		}
+	}
+	return max;
+}
+
 double __max(XArray array) {
 	double max = 0;
 
@@ -246,17 +256,13 @@ double __max(XArray array) {
 			break;
 			}
 		case FLT:
-			max = 0;
+			{
+			max = __maxdbl(__doublecast(array), array.shape.len);
+			}
 			break;
 		case DBL:
 			{
-			max = 0;
-			double * locarray = __doublecast(array);
-			for (int i=0; i<array.shape.len; i++){
-				if (locarray[i] > max) {
-					max = locarray[i];
-				}
-			}
+			max = __maxdbl(__doublecast(array), array.shape.len);
 			break;
 			}
 	}
