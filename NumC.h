@@ -6,6 +6,7 @@
 #include <stdint.h>
 
 // TODO: check if we can generally typecast a struct
+// TODO: All needed is length and a function that can calculate position in 1D array
 
 #ifndef NUMC_H
 #define NUMC_H
@@ -52,6 +53,7 @@ typedef struct {
 	XArray (*zeros)(Sh s, Type type);
 	XArray (*linspace)(double start, double stop, int len, Type type);
 	XArray (*arange)(int start, int stop, int step);
+	XArray (*rand)(Sh s);
 	double (*max)(XArray array); // should take any array
 	double (*dot)(XArray a1, XArray a2);
 	double (*sum)(XArray array);
@@ -124,6 +126,17 @@ XArray rint_(Sh s, Type type){
 	int * rarr = (int*)array.array;
 	for (int i=0; i<elements; i++){
 		rarr[i] = rand();
+	}
+	return array;
+}
+
+XArray rand_(Sh s) {
+	XArray array = __zeros(s, DBL);
+	int64_t elements = el_from_shape(s);
+	srand(time(NULL));
+	double * rarr = (double*)array.array;
+	for (int i=0; i<elements; i++){
+		rarr[i] = rand() * 1.0 / RAND_MAX;
 	}
 	return array;
 }
@@ -294,6 +307,7 @@ NumC numcinit(){
 	// nc.min = &__minint;
 	nc.zeros = &__zeros;
 	nc.randint = &rint_;
+	nc.rand = &rand_;
 	nc.max = &__max;
 	nc.dot = &__std_scalar;
 	nc.sum = &__sum;
