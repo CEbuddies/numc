@@ -99,10 +99,10 @@ int64_t el_from_shape(Sh s) {
 	elements = s.sh[0] * s.sh[1];
 	return elements;
 }
-
+// FIXME: Constructor of XArray incorrect as first arg is len!
 XArray __zeros(Sh s, Type type){
 	check_shape(s);
-	XArray xarray = {{s.sh[0], s.sh[1], type}, NULL};
+	XArray xarray = {{0, {s.sh[0], s.sh[1]}, type}, NULL};
 	int64_t elements = el_from_shape(s);
 	xarray.shape.len = elements;
 
@@ -295,6 +295,57 @@ double __std_scalar(XArray a1, XArray a2){
 		sum += (double)locarr1[i] * (double)locarr2[i];
 	}    
 	return sum;
+}
+
+void __print_int(XArray array) {
+	int * locarr = (int*)array.array;
+	printf("Printing array of type INT(\n");
+	for (int i=0; i<array.shape.s.sh[1]; i++){
+		printf("Row %d: ", i);
+		for (int j=0; j<array.shape.s.sh[0]; j++){
+			printf("%d ", locarr[i*array.shape.s.sh[0] + j]);
+		}
+		printf("\n");
+	}
+	printf(")\n");
+}
+
+void __print_double(XArray array) {
+	double * locarr = __doublecast(array);
+	printf("Printing array of type DOUBLE(\n");
+	printf("Shape(%d, %d)\n", array.shape.s.sh[0], array.shape.s.sh[1]);
+	for (int line=0; line<array.shape.s.sh[1]; line++) {
+		printf("Row %d: ", line);
+		for (int col=0; col<array.shape.s.sh[0]; col++){
+			printf("%f ", locarr[line*array.shape.s.sh[0] + col]);
+		}
+		printf("\n");
+	}
+	printf(")\n");
+}
+
+void __print(XArray array) {
+	printf("Printing for type %d\n", array.shape.type);
+	switch (array.shape.type) {
+		case INT:
+			{
+			__print_int(array);
+			break;
+			}
+		case FLT:
+			{
+			float * locarr = (float*)array.array;
+			for (int i=0; i<array.shape.len; i++){
+				printf("%f ", locarr[i]);
+			}
+			break;
+			}
+		case DBL:
+			{
+			__print_double(array);
+			break;
+			}
+	}
 }
 
 /**
