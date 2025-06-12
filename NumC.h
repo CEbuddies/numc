@@ -18,7 +18,7 @@ typedef union {
 		int s2;
 		int s3;
 	} shapef;
-	int sh[4];
+	int sh[2];
 } Sh;
 
 
@@ -28,8 +28,8 @@ typedef struct {
 	double val;
 } Tuple;
 
-#define SHAPE(a, b, c, d) \
-	((Sh) {.sh[0]=a, .sh[1]=b, .sh[2]=c, .sh[3]=d})
+#define SHAPE(a, b) \
+	((Sh) {.sh[0]=a, .sh[1]=b})
 
 typedef enum {
 	INT,
@@ -95,7 +95,7 @@ int __free(XArray array) {
 
 int64_t el_from_shape(Sh s) {
 	int64_t elements;
-	elements = s.sh[0] * s.sh[1] * s.sh[2] * s.sh[3];
+	elements = s.sh[0] * s.sh[1];
 	return elements;
 }
 
@@ -198,7 +198,7 @@ void __fill(XArray array, double val) {
 
 }
 XArray __linspace(double start, double stop, int len, Type type) {
-	XArray array = __zeros(SHAPE(len, 1, 1, 1), type);
+	XArray array = __zeros(SHAPE(len, 1), type);
 	double * locarr = (double*)array.array;
 
 	int diff = stop - start;
@@ -218,7 +218,7 @@ XArray __linspace(double start, double stop, int len, Type type) {
  * @return XAarray
  */
 XArray __arange(int start, int stop, int step) {
-	XArray array = __zeros(SHAPE(stop-start, 1, 1, 1), INT);
+	XArray array = __zeros(SHAPE(stop-start, 1), INT);
 	int * locarr = (int*)array.array;
 	for (int i=0; i<array.shape.len; i++){
 		locarr[i] = start + (step * i);
