@@ -30,7 +30,6 @@ void print_lines(XArray exarr) {
 int main(){
 	printf("NumC testsuite!\n");
 	NumC nc = numcinit(); // "import" numpy
-	const int TEST_ARR_LEN = 2;
 	// nc.fill(arr, 4);
 	XArray linspaced = nc.linspace(0, 10, 10, DBL);
 	XArray aranged = nc.arange(0, 6, 1);
