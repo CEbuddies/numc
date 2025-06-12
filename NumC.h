@@ -99,7 +99,7 @@ int64_t el_from_shape(Sh s) {
 	elements = s.sh[0] * s.sh[1];
 	return elements;
 }
-// FIXME: Constructor of XArray incorrect as first arg is len!
+
 XArray __zeros(Sh s, Type type){
 	check_shape(s);
 	XArray xarray = {{0, {s.sh[0], s.sh[1]}, type}, NULL};
@@ -169,7 +169,6 @@ void __fill(XArray array, double val) {
 	int64_t elements = el_from_shape(array.shape.s);
 	printf("Filling in for %li elements\n", elements);
 
-	void * arr;
 
 	switch (array.shape.type) {
 		case INT:
@@ -240,6 +239,7 @@ double __sum(XArray array) {
 	return sum;
 }
 
+// MAX
 double __maxint(int * array, size_t len) {
 	double max = 0;
 	for (int i=0; i<len; i++){
@@ -297,9 +297,11 @@ double __std_scalar(XArray a1, XArray a2){
 	return sum;
 }
 
+// PRINTING
 void __print_int(XArray array) {
 	int * locarr = (int*)array.array;
 	printf("Printing array of type INT(\n");
+	printf("Shape(%d, %d)\n", array.shape.s.sh[0], array.shape.s.sh[1]);
 	for (int i=0; i<array.shape.s.sh[1]; i++){
 		printf("Row %d: ", i);
 		for (int j=0; j<array.shape.s.sh[0]; j++){
@@ -309,6 +311,22 @@ void __print_int(XArray array) {
 	}
 	printf(")\n");
 }
+
+void __print_float(XArray array) {
+	float * locarr = __floatcast(array);
+	size_t nlines = array.shape.s.sh[0];
+	size_t ncols = array.shape.s.sh[1];
+	printf("Printing array of type FLOAT(\n");
+	printf("Shape(%d, %d)\n", array.shape.s.sh[0], array.shape.s.sh[1]);
+	for (int line=0; line<nlines; line++) {
+		for (int col=0; col<ncols; col++) {
+			printf("%f ", locarr[line*nlines + col]);
+		}
+		printf("\n");
+	}
+	printf(")\n");
+}
+
 
 void __print_double(XArray array) {
 	double * locarr = __doublecast(array);
@@ -334,10 +352,7 @@ void __print(XArray array) {
 			}
 		case FLT:
 			{
-			float * locarr = (float*)array.array;
-			for (int i=0; i<array.shape.len; i++){
-				printf("%f ", locarr[i]);
-			}
+			__print_float(array);
 			break;
 			}
 		case DBL:
@@ -347,6 +362,7 @@ void __print(XArray array) {
 			}
 	}
 }
+// NumC Def
 
 /**
  * @brief Init function for NumC that sets it up (import numpy as np)
