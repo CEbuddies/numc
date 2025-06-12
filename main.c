@@ -46,6 +46,9 @@ int main(){
 	printf("Dot result: %lf\n", dotres);
 	nc.free(linspaced);
 	printf("Sum aranged: %lf\n", nc.sum(aranged));
+	XArray some = nc.zeros(SHAPE(2, 3), DBL);
+	nc.fill(some, 2);
+	nc.print(some);
 	XArray fail = nc.zeros(SHAPE(10, -1), DBL);
 
 
