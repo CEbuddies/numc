@@ -60,6 +60,7 @@ typedef struct {
 	void (*fill)(XArray array, double val);
 	void (*shape)(XArray array);
 	int (*free)(XArray array);
+	void (*print)(XArray array);
 } NumC;
 
 
@@ -101,8 +102,9 @@ int64_t el_from_shape(Sh s) {
 
 XArray __zeros(Sh s, Type type){
 	check_shape(s);
-	XArray xarray = {{s.sh[0], s, type}, NULL};
+	XArray xarray = {{s.sh[0], s.sh[1], type}, NULL};
 	int64_t elements = el_from_shape(s);
+	xarray.shape.len = elements;
 
 	switch(type) {
 		case INT:
@@ -315,6 +317,7 @@ NumC numcinit(){
 	nc.linspace = &__linspace;
 	nc.arange = &__arange;
 	nc.free = &__free;
+	nc.print = &__print;
 	return nc;
 }
 
