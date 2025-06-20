@@ -15,8 +15,6 @@ typedef union {
 	struct {
 		int s0;
 		int s1;
-		int s2;
-		int s3;
 	} shapef;
 	int sh[2];
 } Sh;
@@ -79,8 +77,8 @@ static float * __floatcast(XArray array) {
 }
 
 static void check_shape(Sh s) {
-	// loop over shape	
-	for (int i=0; i<4; i++){
+	// loop over shape
+	for (int i=0; i<2; i++){
 		if (s.sh[i] < 0) {
 			printf("ERROR: Negative shapes are not possible!\n");
 			exit(1);
@@ -235,7 +233,7 @@ double __sum(XArray array) {
 		for (int i=0; i<array.shape.len; i++){
 			sum += locarr[i];
 		}
-	}	
+	}
 	return sum;
 }
 
@@ -293,7 +291,7 @@ double __std_scalar(XArray a1, XArray a2){
 	int * locarr2 = (int*)a2.array;
 	for (int i=0; i<a1.shape.len; i++){
 		sum += (double)locarr1[i] * (double)locarr2[i];
-	}    
+	}
 	return sum;
 }
 
