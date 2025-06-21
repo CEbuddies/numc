@@ -5,8 +5,8 @@
 #include <string.h>
 #include <stdint.h>
 
-// TODO: check if we can generally typecast a struct
-// TODO: All needed is length and a function that can calculate position in 1D array
+// TODO: Indexing, e.g. make a __index function taking lines and cols
+// TODO: fix rows vs. cols issue, row should be first index
 
 #ifndef NUMC_H
 #define NUMC_H
@@ -352,50 +352,54 @@ XArray __cumsum(XArray array) {
 // PRINTING
 void __print_int(XArray array) {
 	int * locarr = (int*)array.array;
-	printf("Printing array of type INT(\n");
+	size_t nlines = array.shape.s.sh[0];
+	size_t ncols = array.shape.s.sh[1];
+	printf("Printing array of type INT{");
 	printf("Shape(%d, %d)\n", array.shape.s.sh[0], array.shape.s.sh[1]);
-	for (int i=0; i<array.shape.s.sh[1]; i++){
-		printf("Row %d: ", i);
-		for (int j=0; j<array.shape.s.sh[0]; j++){
+	for (int i=0; i<nlines; i++){
+		printf("  ");
+		for (int j=0; j<ncols; j++){
 			printf("%d ", locarr[i*array.shape.s.sh[0] + j]);
 		}
 		printf("\n");
 	}
-	printf(")\n");
+	printf("}\n");
 }
 
 void __print_float(XArray array) {
 	float * locarr = __floatcast(array);
 	size_t nlines = array.shape.s.sh[0];
 	size_t ncols = array.shape.s.sh[1];
-	printf("Printing array of type FLOAT(\n");
+	printf("Printing array of type FLOAT{");
 	printf("Shape(%d, %d)\n", array.shape.s.sh[0], array.shape.s.sh[1]);
 	for (int line=0; line<nlines; line++) {
+		printf("  ");
 		for (int col=0; col<ncols; col++) {
-			printf("%f ", locarr[line*nlines + col]);
+			printf("%f ", locarr[line*ncols + col]);
 		}
 		printf("\n");
 	}
-	printf(")\n");
+	printf("}\n");
 }
 
 
 void __print_double(XArray array) {
 	double * locarr = __doublecast(array);
-	printf("Printing array of type DOUBLE(\n");
+	size_t nlines = array.shape.s.sh[0];
+	size_t ncols = array.shape.s.sh[1];
+	printf("Printing array of type DOUBLE{");
 	printf("Shape(%d, %d)\n", array.shape.s.sh[0], array.shape.s.sh[1]);
-	for (int line=0; line<array.shape.s.sh[1]; line++) {
-		printf("Row %d: ", line);
-		for (int col=0; col<array.shape.s.sh[0]; col++){
-			printf("%f ", locarr[line*array.shape.s.sh[0] + col]);
+	for (int line=0; line<nlines; line++) {
+		printf("  ");
+		for (int col=0; col<ncols; col++){
+			printf("%f ", locarr[line * ncols + col]);
 		}
 		printf("\n");
 	}
-	printf(")\n");
+	printf("}\n");
 }
 
 void __print(XArray array) {
-	printf("Printing for type %d\n", array.shape.type);
 	switch (array.shape.type) {
 		case INT:
 			{
