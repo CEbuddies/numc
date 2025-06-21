@@ -1,6 +1,10 @@
+# set compiler which is gcc and debug options as compiler options
+CC=gcc
+CFLAGS=-g
+
 all:
-	gcc -c libNumC.c
-	gcc -c main.c
-	gcc -o test libNumC.o main.o
-run:
+	# we don't use that for now
+# compile simply test to ./test and then run it
+test:
+	$(CC) $(CFLAGS) test.c -o test
 	./test
