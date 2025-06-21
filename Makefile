@@ -2,9 +2,10 @@
 CC=gcc
 CFLAGS=-g
 
-all:
-	# we don't use that for now
+
 # compile simply test to ./test and then run it
-test:
+test: 
 	$(CC) $(CFLAGS) test.c -o test
+	./test
+run:
 	./test
