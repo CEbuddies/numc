@@ -2,8 +2,9 @@
 CC=gcc
 CFLAGS=-g
 
-
-# compile simply test to ./test and then run it
+all: main.c NumC.h
+	$(CC) $(CFLAGS) main.c -o main
+	./main
 test: 
 	$(CC) $(CFLAGS) test.c -o test
 	./test
