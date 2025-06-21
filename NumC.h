@@ -26,6 +26,11 @@ typedef struct {
 	double val;
 } Tuple;
 
+typedef struct {
+	size_t a;
+	size_t b;
+} TwoTuple;
+
 #define SHAPE(a, b) \
 	((Sh) {.sh[0]=a, .sh[1]=b})
 
@@ -52,6 +57,7 @@ typedef struct {
 	XArray (*linspace)(double start, double stop, int len, Type type);
 	XArray (*arange)(int start, int stop, int step);
 	XArray (*rand)(Sh s);
+	XArray (*cumsum)(XArray array);
 	double (*max)(XArray array); // should take any array
 	double (*dot)(XArray a1, XArray a2);
 	double (*sum)(XArray array);
@@ -295,6 +301,54 @@ double __std_scalar(XArray a1, XArray a2){
 	return sum;
 }
 
+void __csumInt(int * csarray, int * array, size_t len) {
+	double csum_counter = 0;
+	for (int i=0; i<len; i++){
+		csum_counter += array[i];
+		csarray[i] = csum_counter;
+	}
+}
+
+void __csumDouble(double * csarray, double * array, size_t len) {
+	double csum_counter = 0;
+	for (int i=0; i<len; i++){
+		csum_counter += array[i];
+		csarray[i] = csum_counter;
+	}
+}
+
+void __csumFloat(float * csarray, float * array, size_t len) {
+	double csum_counter = 0;
+	for (int i=0; i<len; i++){
+		csum_counter += array[i];
+		csarray[i] = csum_counter;
+	}
+}
+
+XArray __cumsum(XArray array) {
+	XArray csumarray = __zeros(array.shape.s, DBL);
+	switch (array.shape.type) {
+		case INT:
+			{
+			int * locarray = __intcast(array);
+			__csumInt(__intcast(csumarray), locarray, array.shape.len);
+			break;
+			}
+		case FLT:
+			{
+			float * locarray = __floatcast(array);
+			__csumFloat(__floatcast(csumarray), locarray, array.shape.len);
+			break;
+			}
+		case DBL:
+			{
+			double * locarray = __doublecast(array);
+			__csumDouble(__doublecast(csumarray), locarray, array.shape.len);
+			break;
+			}
+	}
+	return csumarray;
+}
 // PRINTING
 void __print_int(XArray array) {
 	int * locarr = (int*)array.array;
@@ -380,6 +434,7 @@ NumC numcinit(){
 	nc.sum = &__sum;
 	nc.fill = &__fill;
 	nc.linspace = &__linspace;
+	nc.cumsum = &__cumsum;
 	nc.arange = &__arange;
 	nc.free = &__free;
 	nc.print = &__print;
