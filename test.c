@@ -7,7 +7,7 @@ int main() {
 
 	// Test 1: Create and test zeros array
 	printf("\n=== Test 1: Zeros array ===\n");
-	XArray zeros_arr = nc.zeros(SHAPE(2, 3, 1, 1), INT);
+	XArray zeros_arr = nc.zeros(SHAPE(2, 3), INT);
 	printf("Shape: %d %d %d %d\n", zeros_arr.shape.s.sh[0], 
 	zeros_arr.shape.s.sh[1], 
 	zeros_arr.shape.s.sh[2], 
@@ -44,7 +44,7 @@ int main() {
 
 	// Test 4: Test sum and max
 	printf("\n=== Test 4: Sum and Max ===\n");
-	XArray test_arr = nc.zeros(SHAPE(3, 1, 1, 1), INT);
+	XArray test_arr = nc.zeros(SHAPE(3, 1), INT);
 	nc.fill(test_arr, 5);
 
 	printf("Sum: %.1f\n", nc.sum(test_arr));
@@ -53,8 +53,8 @@ int main() {
 
 	// Test 5: Test dot product
 	printf("\n=== Test 5: Dot Product ===\n");
-	XArray a1 = nc.zeros(SHAPE(3, 1, 1, 1), INT);
-	XArray a2 = nc.zeros(SHAPE(3, 1, 1, 1), INT);
+	XArray a1 = nc.zeros(SHAPE(3, 1), INT);
+	XArray a2 = nc.zeros(SHAPE(3, 1), INT);
 
 	nc.fill(a1, 1);
 	nc.fill(a2, 2);
@@ -65,7 +65,7 @@ int main() {
 	nc.free(a2);
 
 	printf("\n=== Test 6: Random doubles ===\n");
-	XArray rand_dbl = nc.rand(SHAPE(3, 1, 1, 1));
+	XArray rand_dbl = nc.rand(SHAPE(3, 1));
 	double *rand_dbl_data = __doublecast(rand_dbl);
 	printf("Random doubles: ");
 	for(int i = 0; i < 3; i++) {
@@ -74,8 +74,19 @@ int main() {
 	printf("\n");
 	nc.free(rand_dbl);
 
-	printf("\n=== Test 7: Error handling ===\n");
-	XArray fail = nc.zeros(SHAPE(10, -1, 1, 1), DBL);
+	printf("\n=== Test 7: Cumsum ===\n");
+	XArray lsp = nc.linspace(0.0, 1.0, 5, DBL);
+	XArray csum = nc.cumsum(lsp);
+	nc.print(lsp);
+	nc.print(csum);
+
+	nc.free(lsp);
+	nc.free(csum);
+
+	printf("\n=== Test 8: Error handling ===\n");
+	XArray fail = nc.zeros(SHAPE(10, -1), DBL);
+
+
 
 	return 0;
 }
