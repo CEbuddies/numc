@@ -83,7 +83,13 @@ int main() {
 	nc.free(lsp);
 	nc.free(csum);
 
-	printf("\n=== Test 8: Error handling ===\n");
+	printf("\n=== Test 8: Min ===\n");
+	XArray minarr = nc.zeros(SHAPE(3, 1), INT);
+	nc.fill(minarr, 5);
+	printf("Min: %.1f\n", nc.min(minarr));
+	nc.free(minarr);
+
+	printf("\n=== Test 9: Error handling ===\n");
 	XArray fail = nc.zeros(SHAPE(10, -1), DBL);
 
 
