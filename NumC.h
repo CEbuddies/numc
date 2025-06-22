@@ -59,6 +59,7 @@ typedef struct {
 	XArray (*rand)(Sh s);
 	XArray (*cumsum)(XArray array);
 	double (*max)(XArray array); // should take any array
+	double (*min)(XArray array);
 	double (*dot)(XArray a1, XArray a2);
 	double (*sum)(XArray array);
 	void (*fill)(XArray array, double val);
@@ -288,6 +289,60 @@ double __max(XArray array) {
 
 	return max;
 }
+
+double __minint(int * array, size_t len) {
+	double min = array[0];
+	for (int i=0; i<len; i++){
+		if (array[i] < min) {
+			min = array[i];
+		}
+	}
+	return min;
+}
+
+double __minflt(float * array, size_t len) {
+	double min = array[0];
+	for (int i=0; i<len; i++){
+		if (array[i] < min) {
+			min = array[i];
+		}
+	}
+	return min;
+}
+
+double __mindbl(double * array, size_t len) {
+	double min = array[0];
+	for (int i=0; i<len; i++){
+		if (array[i] < min) {
+			min = array[i];
+		}
+	}
+	return min;
+}
+
+//TODO: implement the respective mins
+double __min(XArray array) {
+	double min = 0;
+
+	switch (array.shape.type) {
+		case INT:
+			{
+			min = __minint(__intcast(array), array.shape.len);
+			break;
+			}
+		case FLT:
+			{
+			min = __minflt(__floatcast(array), array.shape.len);
+			}
+			break;
+		case DBL:
+			{
+			min = __mindbl(__doublecast(array), array.shape.len);
+			break;
+			}
+	}
+	return min;
+}
 // std scalar product for arbitray types with void * pointers
 double __std_scalar(XArray a1, XArray a2){
 
@@ -428,12 +483,11 @@ void __print(XArray array) {
 NumC numcinit(){
 
 	NumC nc;
-	// nc.max = &__maxint;
-	// nc.min = &__minint;
 	nc.zeros = &__zeros;
 	nc.randint = &rint_;
 	nc.rand = &rand_;
 	nc.max = &__max;
+	nc.min = &__min;
 	nc.dot = &__std_scalar;
 	nc.sum = &__sum;
 	nc.fill = &__fill;
