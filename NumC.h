@@ -5,7 +5,7 @@
 #include <string.h>
 #include <stdint.h>
 
-// TODO: check if we can generally typecast a struct
+// TODO: Indexing, e.g. make a __index function taking lines and cols
 
 #ifndef NUMC_H
 #define NUMC_H
@@ -14,10 +14,8 @@ typedef union {
 	struct {
 		int s0;
 		int s1;
-		int s2;
-		int s3;
 	} shapef;
-	int sh[4];
+	int sh[2];
 } Sh;
 
 
@@ -27,8 +25,13 @@ typedef struct {
 	double val;
 } Tuple;
 
-#define SHAPE(a, b, c, d) \
-	((Sh) {.sh[0]=a, .sh[1]=b, .sh[2]=c, .sh[3]=d})
+typedef struct {
+	size_t a;
+	size_t b;
+} TwoTuple;
+
+#define SHAPE(a, b) \
+	((Sh) {.sh[0]=a, .sh[1]=b})
 
 typedef enum {
 	INT,
@@ -52,12 +55,16 @@ typedef struct {
 	XArray (*zeros)(Sh s, Type type);
 	XArray (*linspace)(double start, double stop, int len, Type type);
 	XArray (*arange)(int start, int stop, int step);
+	XArray (*rand)(Sh s);
+	XArray (*cumsum)(XArray array);
 	double (*max)(XArray array); // should take any array
+	double (*min)(XArray array);
 	double (*dot)(XArray a1, XArray a2);
 	double (*sum)(XArray array);
 	void (*fill)(XArray array, double val);
 	void (*shape)(XArray array);
 	int (*free)(XArray array);
+	void (*print)(XArray array);
 } NumC;
 
 
@@ -76,8 +83,8 @@ static float * __floatcast(XArray array) {
 }
 
 static void check_shape(Sh s) {
-	// loop over shape	
-	for (int i=0; i<4; i++){
+	// loop over shape
+	for (int i=0; i<2; i++){
 		if (s.sh[i] < 0) {
 			printf("ERROR: Negative shapes are not possible!\n");
 			exit(1);
@@ -93,14 +100,15 @@ int __free(XArray array) {
 
 int64_t el_from_shape(Sh s) {
 	int64_t elements;
-	elements = s.sh[0] * s.sh[1] * s.sh[2] * s.sh[3];
+	elements = s.sh[0] * s.sh[1];
 	return elements;
 }
 
 XArray __zeros(Sh s, Type type){
 	check_shape(s);
-	XArray xarray = {{s.sh[0], s, type}, NULL};
+	XArray xarray = {{0, {s.sh[0], s.sh[1]}, type}, NULL};
 	int64_t elements = el_from_shape(s);
+	xarray.shape.len = elements;
 
 	switch(type) {
 		case INT:
@@ -124,6 +132,17 @@ XArray rint_(Sh s, Type type){
 	int * rarr = (int*)array.array;
 	for (int i=0; i<elements; i++){
 		rarr[i] = rand();
+	}
+	return array;
+}
+
+XArray rand_(Sh s) {
+	XArray array = __zeros(s, DBL);
+	int64_t elements = el_from_shape(s);
+	srand(time(NULL));
+	double * rarr = (double*)array.array;
+	for (int i=0; i<elements; i++){
+		rarr[i] = rand() * 1.0 / RAND_MAX;
 	}
 	return array;
 }
@@ -154,7 +173,6 @@ void __fill(XArray array, double val) {
 	int64_t elements = el_from_shape(array.shape.s);
 	printf("Filling in for %li elements\n", elements);
 
-	void * arr;
 
 	switch (array.shape.type) {
 		case INT:
@@ -185,7 +203,7 @@ void __fill(XArray array, double val) {
 
 }
 XArray __linspace(double start, double stop, int len, Type type) {
-	XArray array = __zeros(SHAPE(len, 1, 1, 1), type);
+	XArray array = __zeros(SHAPE(len, 1), type);
 	double * locarr = (double*)array.array;
 
 	int diff = stop - start;
@@ -205,7 +223,7 @@ XArray __linspace(double start, double stop, int len, Type type) {
  * @return XAarray
  */
 XArray __arange(int start, int stop, int step) {
-	XArray array = __zeros(SHAPE(stop-start, 1, 1, 1), INT);
+	XArray array = __zeros(SHAPE(stop-start, 1), INT);
 	int * locarr = (int*)array.array;
 	for (int i=0; i<array.shape.len; i++){
 		locarr[i] = start + (step * i);
@@ -221,11 +239,22 @@ double __sum(XArray array) {
 		for (int i=0; i<array.shape.len; i++){
 			sum += locarr[i];
 		}
-	}	
+	}
 	return sum;
 }
 
+// MAX
 double __maxint(int * array, size_t len) {
+	double max = 0;
+	for (int i=0; i<len; i++){
+		if (array[i] > max) {
+			max = array[i];
+		}
+	}
+	return max;
+}
+
+double __maxdbl(double * array, size_t len) {
 	double max = 0;
 	for (int i=0; i<len; i++){
 		if (array[i] > max) {
@@ -246,22 +275,72 @@ double __max(XArray array) {
 			break;
 			}
 		case FLT:
-			max = 0;
+			{
+			max = __maxdbl(__doublecast(array), array.shape.len);
+			}
 			break;
 		case DBL:
 			{
-			max = 0;
-			double * locarray = __doublecast(array);
-			for (int i=0; i<array.shape.len; i++){
-				if (locarray[i] > max) {
-					max = locarray[i];
-				}
-			}
+			max = __maxdbl(__doublecast(array), array.shape.len);
 			break;
 			}
 	}
 
 	return max;
+}
+
+double __minint(int * array, size_t len) {
+	double min = array[0];
+	for (int i=0; i<len; i++){
+		if (array[i] < min) {
+			min = array[i];
+		}
+	}
+	return min;
+}
+
+double __minflt(float * array, size_t len) {
+	double min = array[0];
+	for (int i=0; i<len; i++){
+		if (array[i] < min) {
+			min = array[i];
+		}
+	}
+	return min;
+}
+
+double __mindbl(double * array, size_t len) {
+	double min = array[0];
+	for (int i=0; i<len; i++){
+		if (array[i] < min) {
+			min = array[i];
+		}
+	}
+	return min;
+}
+
+//TODO: implement the respective mins
+double __min(XArray array) {
+	double min = 0;
+
+	switch (array.shape.type) {
+		case INT:
+			{
+			min = __minint(__intcast(array), array.shape.len);
+			break;
+			}
+		case FLT:
+			{
+			min = __minflt(__floatcast(array), array.shape.len);
+			}
+			break;
+		case DBL:
+			{
+			min = __mindbl(__doublecast(array), array.shape.len);
+			break;
+			}
+	}
+	return min;
 }
 // std scalar product for arbitray types with void * pointers
 double __std_scalar(XArray a1, XArray a2){
@@ -272,9 +351,128 @@ double __std_scalar(XArray a1, XArray a2){
 	int * locarr2 = (int*)a2.array;
 	for (int i=0; i<a1.shape.len; i++){
 		sum += (double)locarr1[i] * (double)locarr2[i];
-	}    
+	}
 	return sum;
 }
+
+void __csumInt(int * csarray, int * array, size_t len) {
+	double csum_counter = 0;
+	for (int i=0; i<len; i++){
+		csum_counter += array[i];
+		csarray[i] = csum_counter;
+	}
+}
+
+void __csumDouble(double * csarray, double * array, size_t len) {
+	double csum_counter = 0;
+	for (int i=0; i<len; i++){
+		csum_counter += array[i];
+		csarray[i] = csum_counter;
+	}
+}
+
+void __csumFloat(float * csarray, float * array, size_t len) {
+	double csum_counter = 0;
+	for (int i=0; i<len; i++){
+		csum_counter += array[i];
+		csarray[i] = csum_counter;
+	}
+}
+
+XArray __cumsum(XArray array) {
+	XArray csumarray = __zeros(array.shape.s, DBL);
+	switch (array.shape.type) {
+		case INT:
+			{
+			int * locarray = __intcast(array);
+			__csumInt(__intcast(csumarray), locarray, array.shape.len);
+			break;
+			}
+		case FLT:
+			{
+			float * locarray = __floatcast(array);
+			__csumFloat(__floatcast(csumarray), locarray, array.shape.len);
+			break;
+			}
+		case DBL:
+			{
+			double * locarray = __doublecast(array);
+			__csumDouble(__doublecast(csumarray), locarray, array.shape.len);
+			break;
+			}
+	}
+	return csumarray;
+}
+// PRINTING
+void __print_int(XArray array) {
+	int * locarr = (int*)array.array;
+	size_t nlines = array.shape.s.sh[0];
+	size_t ncols = array.shape.s.sh[1];
+	printf("Printing array of type INT{");
+	printf("Shape(%d, %d)\n", array.shape.s.sh[0], array.shape.s.sh[1]);
+	for (int i=0; i<nlines; i++){
+		printf("  ");
+		for (int j=0; j<ncols; j++){
+			printf("%d ", locarr[i*array.shape.s.sh[0] + j]);
+		}
+		printf("\n");
+	}
+	printf("}\n");
+}
+
+void __print_float(XArray array) {
+	float * locarr = __floatcast(array);
+	size_t nlines = array.shape.s.sh[0];
+	size_t ncols = array.shape.s.sh[1];
+	printf("Printing array of type FLOAT{");
+	printf("Shape(%d, %d)\n", array.shape.s.sh[0], array.shape.s.sh[1]);
+	for (int line=0; line<nlines; line++) {
+		printf("  ");
+		for (int col=0; col<ncols; col++) {
+			printf("%f ", locarr[line*ncols + col]);
+		}
+		printf("\n");
+	}
+	printf("}\n");
+}
+
+
+void __print_double(XArray array) {
+	double * locarr = __doublecast(array);
+	size_t nlines = array.shape.s.sh[0];
+	size_t ncols = array.shape.s.sh[1];
+	printf("Printing array of type DOUBLE{");
+	printf("Shape(%d, %d)\n", array.shape.s.sh[0], array.shape.s.sh[1]);
+	for (int line=0; line<nlines; line++) {
+		printf("  ");
+		for (int col=0; col<ncols; col++){
+			printf("%f ", locarr[line * ncols + col]);
+		}
+		printf("\n");
+	}
+	printf("}\n");
+}
+
+void __print(XArray array) {
+	switch (array.shape.type) {
+		case INT:
+			{
+			__print_int(array);
+			break;
+			}
+		case FLT:
+			{
+			__print_float(array);
+			break;
+			}
+		case DBL:
+			{
+			__print_double(array);
+			break;
+			}
+	}
+}
+// NumC Def
 
 /**
  * @brief Init function for NumC that sets it up (import numpy as np)
@@ -284,17 +482,19 @@ double __std_scalar(XArray a1, XArray a2){
 NumC numcinit(){
 
 	NumC nc;
-	// nc.max = &__maxint;
-	// nc.min = &__minint;
 	nc.zeros = &__zeros;
 	nc.randint = &rint_;
+	nc.rand = &rand_;
 	nc.max = &__max;
+	nc.min = &__min;
 	nc.dot = &__std_scalar;
 	nc.sum = &__sum;
 	nc.fill = &__fill;
 	nc.linspace = &__linspace;
+	nc.cumsum = &__cumsum;
 	nc.arange = &__arange;
 	nc.free = &__free;
+	nc.print = &__print;
 	return nc;
 }
 

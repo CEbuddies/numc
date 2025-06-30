@@ -30,7 +30,6 @@ void print_lines(XArray exarr) {
 int main(){
 	printf("NumC testsuite!\n");
 	NumC nc = numcinit(); // "import" numpy
-	const int TEST_ARR_LEN = 2;
 	// nc.fill(arr, 4);
 	XArray linspaced = nc.linspace(0, 10, 10, DBL);
 	XArray aranged = nc.arange(0, 6, 1);
@@ -38,15 +37,18 @@ int main(){
 	printf("Testarr: %lf\n", testarr[3]);
 
 
-	XArray dot1 = nc.zeros(SHAPE(10, 10, 1, 1), INT);
-	XArray dot2 = nc.zeros(SHAPE(10, 10, 1, 1), INT);
+	XArray dot1 = nc.zeros(SHAPE(10, 10), INT);
+	XArray dot2 = nc.zeros(SHAPE(10, 10), INT);
 	nc.fill(dot1, 1);
 	nc.fill(dot2, 2);
 	double dotres = nc.dot(dot1, dot2);
 	printf("Dot result: %lf\n", dotres);
 	nc.free(linspaced);
 	printf("Sum aranged: %lf\n", nc.sum(aranged));
-	XArray fail = nc.zeros(SHAPE(10, -1, 1, 1), DBL);
+	XArray some = nc.zeros(SHAPE(2, 3), DBL);
+	nc.fill(some, 2);
+	nc.print(some);
+	XArray fail = nc.zeros(SHAPE(10, -1), DBL);
 
 
 
