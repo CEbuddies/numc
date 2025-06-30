@@ -6,7 +6,6 @@
 #include <stdint.h>
 
 // TODO: Indexing, e.g. make a __index function taking lines and cols
-// TODO: fix rows vs. cols issue, row should be first index
 
 #ifndef NUMC_H
 #define NUMC_H
