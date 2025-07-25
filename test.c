@@ -89,7 +89,21 @@ int main() {
 	printf("Min: %.1f\n", nc.min(minarr));
 	nc.free(minarr);
 
-	printf("\n=== Test 9: Error handling ===\n");
+	printf("\n=== Test 9: Setting ===\n");
+	XArray setarr = nc.zeros(SHAPE(3, 3), DBL);
+	nc.set(setarr, 4, 3.14);
+	nc.print(setarr);
+	nc.free(setarr);
+
+	// Will always fail and exit actually
+	printf("\n=== Test 10: Setting out of bounds ===\n");
+	XArray setarr2 = nc.zeros(SHAPE(3, 3), DBL);
+	nc.set(setarr2, 10, 3.14);
+	nc.print(setarr2);
+	nc.free(setarr2);
+
+	// Will always fail and exit actually
+	printf("\n=== Test FINAL: Error handling ===\n");
 	XArray fail = nc.zeros(SHAPE(10, -1), DBL);
 
 
