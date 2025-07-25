@@ -65,6 +65,7 @@ typedef struct {
 	void (*shape)(XArray array);
 	int (*free)(XArray array);
 	void (*print)(XArray array);
+	void (*set)(XArray array, size_t idx, double val);
 } NumC;
 
 
@@ -102,6 +103,26 @@ int64_t el_from_shape(Sh s) {
 	int64_t elements;
 	elements = s.sh[0] * s.sh[1];
 	return elements;
+}
+
+void __set(XArray array, size_t idx, double val) {
+
+	size_t numel = el_from_shape(array.shape.s);
+	if (idx >= numel) {
+		printf("ERROR: Index out of bounds\n");
+		exit(1);
+	}
+	switch(array.shape.type) {
+		case INT:
+			__intcast(array)[idx] = (int)val;
+			break;
+		case FLT:
+			__floatcast(array)[idx] = (float)val;
+			break;
+		case DBL:
+			__doublecast(array)[idx] = val;
+			break;
+	}
 }
 
 XArray __zeros(Sh s, Type type){
@@ -493,6 +514,7 @@ NumC numcinit(){
 	nc.linspace = &__linspace;
 	nc.cumsum = &__cumsum;
 	nc.arange = &__arange;
+	nc.set = &__set;
 	nc.free = &__free;
 	nc.print = &__print;
 	return nc;
