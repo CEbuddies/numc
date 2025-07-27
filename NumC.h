@@ -40,7 +40,7 @@ typedef enum {
 } Type;
 
 typedef struct {
-	int len;
+	size_t len;
 	Sh s;
 	Type type;
 } XShape;
@@ -65,6 +65,8 @@ typedef struct {
 	void (*shape)(XArray array);
 	int (*free)(XArray array);
 	void (*print)(XArray array);
+	void (*set)(XArray array, Sh s, double val);
+	double (*get)(XArray array, Sh s);
 } NumC;
 
 
@@ -102,6 +104,46 @@ int64_t el_from_shape(Sh s) {
 	int64_t elements;
 	elements = s.sh[0] * s.sh[1];
 	return elements;
+}
+
+void __set(XArray array, Sh s, double val) {
+
+	size_t idx = el_from_shape(s);
+	if (idx >= array.shape.len) {
+		printf("ERROR: Index out of bounds\n");
+		exit(1);
+	}
+	switch(array.shape.type) {
+		case INT:
+			__intcast(array)[idx] = (int)val;
+			break;
+		case FLT:
+			__floatcast(array)[idx] = (float)val;
+			break;
+		case DBL:
+			__doublecast(array)[idx] = val;
+			break;
+	}
+}
+
+double __get(XArray array, Sh s) {
+	size_t numel = el_from_shape(s);
+	if (numel > array.shape.len) {
+		printf("ERROR: Index out of bounds\n");
+		exit(1);
+	}
+
+	switch(array.shape.type) {
+		case INT:
+			return __intcast(array)[numel];
+			break;
+		case FLT:
+			return __floatcast(array)[numel];
+			break;
+		case DBL:
+			return __doublecast(array)[numel];
+			break;
+	}
 }
 
 XArray __zeros(Sh s, Type type){
@@ -493,6 +535,8 @@ NumC numcinit(){
 	nc.linspace = &__linspace;
 	nc.cumsum = &__cumsum;
 	nc.arange = &__arange;
+	nc.set = &__set;
+	nc.get = &__get;
 	nc.free = &__free;
 	nc.print = &__print;
 	return nc;
