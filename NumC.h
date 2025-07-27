@@ -40,7 +40,7 @@ typedef enum {
 } Type;
 
 typedef struct {
-	int len;
+	size_t len;
 	Sh s;
 	Type type;
 } XShape;
@@ -107,8 +107,7 @@ int64_t el_from_shape(Sh s) {
 
 void __set(XArray array, size_t idx, double val) {
 
-	size_t numel = el_from_shape(array.shape.s);
-	if (idx >= numel) {
+	if (idx >= array.shape.len) {
 		printf("ERROR: Index out of bounds\n");
 		exit(1);
 	}
