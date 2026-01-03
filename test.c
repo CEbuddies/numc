@@ -96,17 +96,31 @@ int main() {
 	printf("Also getting individual value: %.2lf\n", nc.get(setarr, SHAPE(2, 2)));
 	nc.free(setarr);
 
+	printf("\n=== Test 11: Plotting ===\n");
+	XArray arr1 = nc.linspace(0.0, 5.0, 20, DBL);
+	XArray arr2 = nc.linspace(0.0, 10.0, 20, DBL);
+	NcPlot plt = ncplotinit();
+	plt.plot(arr1, arr2);
+	nc.free(arr1);
+	nc.free(arr2);
+
+	printf("\n=== Test 12: Scatter ===\n");
+	XArray x = nc.linspace(0.0, 5.0, 20, DBL);
+	XArray y = nc.linspace(0.0, 10.0, 20, DBL);
+	plt.scatter(x, y);
+	nc.free(x);
+	nc.free(y);
+
+	// Will always fail and exit actually
+	// printf("\n=== Test FINAL: Error handling ===\n");
+	// XArray fail = nc.zeros(SHAPE(10, -1), DBL);
+
 	// Will always fail and exit actually
 	printf("\n=== Test 10: Setting out of bounds ===\n");
 	XArray setarr2 = nc.zeros(SHAPE(3, 3), DBL);
 	nc.set(setarr2, SHAPE(4, 4), 3.14);
 	nc.print(setarr2);
 	nc.free(setarr2);
-
-	// Will always fail and exit actually
-	printf("\n=== Test FINAL: Error handling ===\n");
-	XArray fail = nc.zeros(SHAPE(10, -1), DBL);
-
 
 
 	return 0;
