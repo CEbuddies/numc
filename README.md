@@ -29,3 +29,11 @@ int main() {
     nc.fill(array, 1); // fill with 1
 }
 ```
+
+## Plotting
+If gnuplot is installed, columnar arrays can be plotted
+
+```c
+NcPlot plt = ncplotinit();
+plt.plot(array1, array2);
+```
