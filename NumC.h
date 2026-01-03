@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 // TODO: Indexing, e.g. make a __index function taking lines and cols
 
@@ -542,4 +543,80 @@ NumC numcinit(){
 	return nc;
 }
 
+// Plotting
+
+typedef struct {
+	bool (*scatter)(XArray x, XArray y);
+	bool (*plot)(XArray x, XArray y);
+	
+}NcPlot;
+
+bool scatter(XArray x, XArray y) {
+    if (x.shape.len != y.shape.len) {
+        fprintf(stderr, "Error: Arrays must have same length\n");
+        return false;
+    }
+	double * array1 = __doublecast(x);
+	double * array2 = __doublecast(y);
+	size_t len = x.shape.len; // the length for all both array
+    
+    FILE *gp = popen("gnuplot -persist", "w");
+    if (!gp) {
+        fprintf(stderr, "Error: Could not open gnuplot.  Is it installed?\n");
+        return false;
+    }
+    
+    // Configure plot
+    fprintf(gp, "set grid\n");
+    fprintf(gp, "set style data lines\n");
+    fprintf(gp, "plot '-' with points title 'data'\n");
+    
+    // Send data
+    for (size_t i = 0; i < len; i++) {
+        fprintf(gp, "%f %f\n", array1[i], array2[i]);
+    }
+    fprintf(gp, "e\n");
+    
+    fflush(gp);
+    pclose(gp);
+    return true;
+}
+
+bool plot(XArray x, XArray y) {
+    if (x.shape.len != y.shape.len) {
+        fprintf(stderr, "Error: Arrays must have same length\n");
+        return false;
+    }
+	double * array1 = __doublecast(x);
+	double * array2 = __doublecast(y);
+	size_t len = x.shape.len; // the length for all both array
+    
+    FILE *gp = popen("gnuplot -persist", "w");
+    if (!gp) {
+        fprintf(stderr, "Error: Could not open gnuplot.  Is it installed?\n");
+        return false;
+    }
+    
+    // Configure plot
+    fprintf(gp, "set grid\n");
+    fprintf(gp, "set style data lines\n");
+    fprintf(gp, "plot '-' with lines title 'data'\n");
+    
+    // Send data
+    for (size_t i = 0; i < len; i++) {
+        fprintf(gp, "%f %f\n", array1[i], array2[i]);
+    }
+    fprintf(gp, "e\n");
+    
+    fflush(gp);
+    pclose(gp);
+    return true;
+}
+
+NcPlot ncplotinit(){
+	NcPlot ncplot;
+	ncplot.scatter = &scatter;
+	ncplot.plot = &plot;
+	return ncplot;
+}
 #endif
