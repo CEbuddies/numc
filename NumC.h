@@ -58,6 +58,7 @@ typedef struct {
 	XArray (*arange)(int start, int stop, int step);
 	XArray (*rand)(Sh s);
 	XArray (*cumsum)(XArray array);
+	XArray (*square)(XArray array);
 	double (*max)(XArray array); // should take any array
 	double (*min)(XArray array);
 	double (*dot)(XArray a1, XArray a2);
@@ -189,6 +190,45 @@ XArray rand_(Sh s) {
 	}
 	return array;
 }
+
+XArray square_(XArray array) {
+	size_t elements = el_from_shape(array.shape.s);
+
+	Type type = array.shape.type; // get type info
+	XArray arr = __zeros(array.shape.s, type);
+
+	switch (type) {
+		case INT:
+			{
+			int * locarray = __intcast(array);
+			int * locarr = __intcast(arr);
+			for (int i=0; i<elements; i++){
+				locarr[i] = locarray[i] * locarray[i];
+			}
+			break;
+			}
+		case FLT:
+			{
+			float * locarray = __floatcast(array);
+			float * locarr = __floatcast(arr);
+			for (int i=0; i<elements; i++){
+				locarr[i] = locarray[i] * locarray[i];
+			}
+			break;
+			}
+		case DBL:
+			{
+			double * locarray = __doublecast(array);
+			double * locarr = __doublecast(arr);
+			for (int i=0; i<elements; i++){
+				locarr[i] = locarray[i] * locarray[i];
+			}
+			break;
+			}
+	}
+	return arr;
+}
+
 
 char * get_typestr(Type type) {
 	char * name[8];
@@ -528,6 +568,7 @@ NumC numcinit(){
 	nc.zeros = &__zeros;
 	nc.randint = &rint_;
 	nc.rand = &rand_;
+	nc.square = &square_;
 	nc.max = &__max;
 	nc.min = &__min;
 	nc.dot = &__std_scalar;
