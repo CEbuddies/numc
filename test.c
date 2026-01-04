@@ -111,6 +111,13 @@ int main() {
 	nc.free(x);
 	nc.free(y);
 
+	printf("\n=== Test 13: Square ===\n");
+	XArray sqarr = nc.linspace(0.0, 2.0, 5, DBL);
+	XArray sqres = nc.square(sqarr);
+	nc.print(sqres);
+	nc.free(sqarr);
+	nc.free(sqres);
+
 	// Will always fail and exit actually
 	// printf("\n=== Test FINAL: Error handling ===\n");
 	// XArray fail = nc.zeros(SHAPE(10, -1), DBL);
